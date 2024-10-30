@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ASSETS from "../config/assetsConfig";
 import API_ENDPOINTS from "../config/apiConfig";
-import { FaComment, FaComments } from 'react-icons/fa';
+import { FaComment, FaComments } from "react-icons/fa";
 
 function Gig() {
   const { id } = useParams();
@@ -132,14 +132,19 @@ function Gig() {
 
           <div className="flex justify-between items-center mb-12">
             <div className="flex items-center space-x-2">
-              {profilePicURL? <img
-                className="w-16 h-16 rounded-full border border-gray-300"
-                src={profilePicURL}
-                alt="User"/>:  <img
-              className="w-16 h-16 rounded-full border border-gray-300"
-              src={ASSETS.defaultProfilePic}
-              alt="User"
-            />}
+              {profilePicURL ? (
+                <img
+                  className="w-16 h-16 rounded-full border border-gray-300"
+                  src={profilePicURL}
+                  alt="User"
+                />
+              ) : (
+                <img
+                  className="w-16 h-16 rounded-full border border-gray-300"
+                  src={ASSETS.defaultProfilePic}
+                  alt="User"
+                />
+              )}
               <span className="text-xl font-semibold text-gray-700">
                 {data.publisher}
               </span>
@@ -153,14 +158,15 @@ function Gig() {
               }
             >
               <h1 className="text-xl font-bold pr-1">chat</h1>
-              <FaComment size = {30}
-        className="text-black" // Tailwind for width, height, and border color
-        style={{
-          fill: 'white',    // Fill color (white inside)
-          stroke: 'black',  // Border color
-          strokeWidth: '20' // Border thickness
-        }}
-      />
+              <FaComment
+                size={30}
+                className="text-black" // Tailwind for width, height, and border color
+                style={{
+                  fill: "white", // Fill color (white inside)
+                  stroke: "black", // Border color
+                  strokeWidth: "20", // Border thickness
+                }}
+              />
               {/* <FaComment size={30} color="white"/> */}
               {/* <i className="ri-chat-3-line ri-2x"></i> */}
             </div>

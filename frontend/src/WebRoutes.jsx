@@ -8,6 +8,7 @@ import {
 import LandingPage from "../src/pages/LandingPage.jsx";
 import Search from "../src/pages/Search.jsx";
 import JobDetails from "../src/pages/JobDetails.jsx";
+import Chat from "../src/pages/Chat.jsx";
 
 const WebRoutes = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ const WebRoutes = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/search" element={<Search/>} />
         <Route path="/search/:id" element={<JobDetails />} />
+        <Route path="/messages" element={<Chat />}/>
         {/* <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

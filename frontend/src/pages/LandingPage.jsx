@@ -6,12 +6,12 @@ import AppInvite from "../components/appInvite/AppInvite";
 
 function LandingPage() {
   return (
-      <div className="flex flex-col space-y-24 min-h-screen">
-        <Hero />
-        <Invite />
-        <MissionVision />
-        <AppInvite />
-      </div>
+    <div className="flex flex-col space-y-24 min-h-screen">
+      <Hero />
+      <Invite />
+      <MissionVision />
+      <AppInvite />
+    </div>
   );
 }
 
