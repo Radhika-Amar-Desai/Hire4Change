@@ -4,7 +4,7 @@ import Sidebar from "../components/chatSidebar/Sidebar.jsx";
 import MainContent from "../components/chatMainContent/MainContent.jsx";
 import API_ENDPOINTS from "../config/apiConfig.js";
 
-const POLLING_INTERVAL = 5000; // 5 seconds
+const POLLING_INTERVAL = 5000;
 
 const Messages = () => {
   const [conversations, setConversations] = useState([]);
@@ -15,7 +15,6 @@ const Messages = () => {
   const navigate = useNavigate();
   const location = useLocation(); // Get location to access passed state
 
-  // Load user and conversations on component mount
   useEffect(() => {
     const user = location.state?.userId || localStorage.getItem("username");
     const receiver = location.state?.receiver;
@@ -36,14 +35,11 @@ const Messages = () => {
   // Fetch the conversations for the user
   const fetchConversations = async (username) => {
     try {
-      const response = await fetch(
-        API_ENDPOINTS.get_all_messages,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username }),
-        }
-      );
+      const response = await fetch(API_ENDPOINTS.get_all_messages, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
       const data = await response.json();
       setConversations(data.conversations);
 
@@ -68,14 +64,11 @@ const Messages = () => {
   const loadConversation = async (sender, receiver) => {
     setCurrentReceiver(receiver);
     try {
-      const response = await fetch(
-        API_ENDPOINTS.get_conversation,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sender, receiver }),
-        }
-      );
+      const response = await fetch(API_ENDPOINTS.get_conversation, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sender, receiver }),
+      });
       const data = await response.json();
       setMessages(data.messages);
     } catch (error) {
@@ -91,20 +84,17 @@ const Messages = () => {
     if (!content) content = messageInput.trim();
     if (content) {
       try {
-        await fetch(
-          API_ENDPOINTS.message,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sender: currentUser,
-              receiver: currentReceiver,
-              content,
-              contentType,
-              timestamp: new Date().toISOString(),
-            }),
-          }
-        );
+        await fetch(API_ENDPOINTS.message, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender: currentUser,
+            receiver: currentReceiver,
+            content,
+            contentType,
+            timestamp: new Date().toISOString(),
+          }),
+        });
         if (contentType === "text") setMessageInput("");
         // Fetch the conversation again to refresh messages
         loadConversation(currentUser, currentReceiver);
@@ -137,21 +127,26 @@ const Messages = () => {
     }
   }, [currentUser, currentReceiver]);
 
-  console.log(currentUser); console.log(currentReceiver);
+  console.log(currentUser);
+  console.log(currentReceiver);
 
   return (
-    
-      <div className="flex m-[4vw] w-full rounded-2xl border-[1px] border-zinc-300 mx-auto bg-white shadow-lg h-[80vh] m-[2vw]">
-        
-        <Sidebar conversations={conversations} loadConversation={loadConversation} 
-                currentUser={currentUser} currentReceiver={currentReceiver} />
-        
-        <MainContent currentUser={currentUser} messages={messages} 
-        messageInput={messageInput} setMessageInput={setMessageInput}
-        sendMessage={sendMessage}/>
+    <div className="flex m-[4vw] w-full rounded-2xl border-[1px] border-zinc-300 mx-auto bg-white shadow-lg h-[80vh] m-[2vw]">
+      <Sidebar
+        conversations={conversations}
+        loadConversation={loadConversation}
+        currentUser={currentUser}
+        currentReceiver={currentReceiver}
+      />
 
-      </div>
-    
+      <MainContent
+        currentUser={currentUser}
+        messages={messages}
+        messageInput={messageInput}
+        setMessageInput={setMessageInput}
+        sendMessage={sendMessage}
+      />
+    </div>
   );
 };
 

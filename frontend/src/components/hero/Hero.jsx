@@ -13,7 +13,10 @@ const SearchBar = ({ search, setSearch, handleKeyDown, clickHandler }) => {
         placeholder="Search ..."
         className="w-[32vw] h-[2.5vw] px-4 py-2 pl-10 border border-gray-300 rounded-full focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
       />
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3" onClick={clickHandler}>
+      <div
+        className="absolute inset-y-0 left-0 flex items-center pl-3"
+        onClick={clickHandler}
+      >
         <FaSearch className="text-gray-400" />
       </div>
     </div>

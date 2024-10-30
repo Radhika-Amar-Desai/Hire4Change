@@ -30,9 +30,8 @@ function Login() {
       const result = await response.json();
 
       if (response.ok) {
-
         localStorage.setItem("username", loginData.username);
-        localStorage.setItem("isLoggedIn", true);
+        localStorage.setItem("isLoggedIn", "true");
 
         navigate("/");
       } else {
@@ -49,11 +48,15 @@ function Login() {
       data-scroll
       data-scroll-speed="0.1"
       className="flex flex-col items-center justify-center mb-32 "
-      exit={{ opacity: 0, transition: { duration: 0.5 } }}>
-
+      exit={{ opacity: 0, transition: { duration: 0.5 } }}
+    >
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-        <label className="text-6xl text-gray-400 mr-auto mb-[2vw]">Sign In</label>
-        <label htmlFor="username" className="text-xl text-gray-400">Username</label>
+        <label className="text-6xl text-gray-400 mr-auto mb-[2vw]">
+          Sign In
+        </label>
+        <label htmlFor="username" className="text-xl text-gray-400">
+          Username
+        </label>
         <input
           name="username"
           type="text"
@@ -62,7 +65,9 @@ function Login() {
           value={username}
           className="border-2 border-gray-200 p-2 lg:w-[20vw]"
         />
-        <label htmlFor="email" className="text-xl text-gray-400">Email</label>
+        <label htmlFor="email" className="text-xl text-gray-400">
+          Email
+        </label>
         <input
           name="email"
           type="text"
@@ -71,7 +76,9 @@ function Login() {
           value={email}
           className="border-2 border-gray-200 p-2 lg:w-[20vw]"
         />
-        <label htmlFor="password" className="text-xl text-gray-400">Password</label>
+        <label htmlFor="password" className="text-xl text-gray-400">
+          Password
+        </label>
         <input
           name="password"
           type="password"

@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import ASSETS from "../../config/assetsConfig";
 
 const ItemCard = ({ item }) => {
-
   console.log(item);
 
   return (
@@ -24,17 +23,15 @@ const ItemCard = ({ item }) => {
         </div>
 
         <div className="info">
-            <div className="user flex overflow-x-scroll justify-center items-center gap-2">
-              <img src={item?.img || ASSETS.defaultProfilePic} alt="User"/>
-              <p className="leading-none tracking-tighter h-[4vw] text-md text-left font-light">
-                <span className="text-mg text-zinc-400 mr-2">
-                  {item?.publisher}:
-                </span>
-                <span className="font-serif">
-                    {item.description}
-                </span>
-              </p>
-            </div>
+          <div className="user flex overflow-x-scroll justify-center items-center gap-2">
+            <img src={item?.img || ASSETS.defaultProfilePic} alt="User" />
+            <p className="leading-none tracking-tighter h-[4vw] text-md text-left font-light">
+              <span className="text-mg text-zinc-400 mr-2">
+                {item?.publisher}:
+              </span>
+              <span className="font-serif">{item.description}</span>
+            </p>
+          </div>
         </div>
         <hr />
         <div className="detail flex">

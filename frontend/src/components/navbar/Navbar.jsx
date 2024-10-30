@@ -1,5 +1,154 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// import React, {useState, useEffect} from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import ASSETS from "../../config/assetsConfig";
+
+// function NavBarImage({ source }) {
+//   return (
+//     <div className="font-bold mx-[2vw] flex items-center">
+//       <Link to="/">
+//         <span className="w-[80px]">
+//           <img className="w-[80px]" src={source} alt="Logo" />
+//         </span>
+//       </Link>
+//     </div>
+//   );
+// }
+
+// const Register = () => {
+//   return (
+//     <div className="text-white px-4 py-2">
+//       <a href="#services" className="hover:bg-gray-700 p-2 rounded">
+//         Register
+//       </a>
+//     </div>
+//   );
+// };
+
+// const Login = () => {
+//   return (
+//     <div className="text-white px-4 py-2">
+//       <Link to={`/login`} className="hover:bg-gray-700 p-2 rounded">Login</Link>
+//     </div>
+//   );
+// };
+
+// const Profile = () => {
+//   const profilePicURL = localStorage.getItem("profilePicURL");
+//   const username = localStorage.getItem("username");
+//   return (
+//     <div className="flex">
+//       {profilePicURL ? (
+//         <NavBarImage source={profilePicURL} />
+//       ) : (
+//         <NavBarImage source={ASSETS.defaultProfilePic} />
+//       )}
+//       <div className="text-white px-4 py-2">
+//         <span className="hover:bg-gray-700 p-2 rounded">{username}</span>
+//       </div>
+//     </div>
+//   );
+// };
+
+// const RegisterLogin = () => {
+//   return (
+//     <>
+//       <Register />
+//       <Login />
+//     </>
+//   );
+// };
+
+// const Logout = () => {
+//   const navigate = useNavigate();
+
+//   const handleLogout = () => {
+//     localStorage.setItem("isLoggedIn", "false");
+//     navigate("/"); // Navigate to the home page or wherever you want to go after logout
+//   };
+
+//   console.log(localStorage);
+
+//   return (
+//     <div className="text-white px-4 py-2">
+//         <button className="hover:bg-gray-700 p-2 rounded" onClick={handleLogout}>
+//           Log Out
+//         </button>
+//     </div>
+//   )
+// }
+
+// const ServicesAfterLogin = () => {
+//   return (
+//     <>
+//       <div className="text-white px-4 py-2">
+//         <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
+//           Edit Profile
+//         </Link>
+//       </div>
+//       <div className="text-white px-4 py-2">
+//         <Link to={`/`} href="#services" className="hover:bg-gray-700 p-2 rounded">
+//           Wallet
+//         </Link>
+//       </div>
+//       <div className="text-white px-4 py-2">
+//         <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
+//           Messages
+//         </Link>
+//       </div>
+//       <Logout/>
+//       <Profile/>
+//     </>
+//   );
+// };
+
+// const Links = () => {
+//   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+
+//   useEffect(() => {
+//     const checkLoginStatus = () => {
+//       setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+//     };
+//     window.addEventListener("storage", checkLoginStatus); // Listen to storage changes
+
+//     return () => {
+//       window.removeEventListener("storage", checkLoginStatus);
+//     };
+//   }, []);
+
+//   return (
+//     <div className="flex space-x-4">
+//       <div className="text-white px-4 py-2">
+//         <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>Home</Link>
+//       </div>
+//       <div className="text-white px-4 py-2">
+//         <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>About Us</Link>
+//       </div>
+//       <div className="text-white px-4 py-2">
+//         <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>
+//           Contact Us
+//         </Link>
+//       </div>
+//       {isLoggedIn ? <ServicesAfterLogin /> : <RegisterLogin />}
+//     </div>
+//   );
+// };
+
+// const Navbar = () => {
+//   console.log(localStorage);
+//   return (
+//     <nav className="sticky top-0 z-50 flex bg-gray-800 p-4">
+//       <NavBarImage source={ASSETS.logo} />
+//       <div className="ml-auto">
+//         <Links />
+//       </div>
+//     </nav>
+//   );
+// };
+
+// export default Navbar;
+
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import ASSETS from "../../config/assetsConfig";
 
 function NavBarImage({ source }) {
@@ -27,7 +176,9 @@ const Register = () => {
 const Login = () => {
   return (
     <div className="text-white px-4 py-2">
-      <span className="hover:bg-gray-700 p-2 rounded">Login</span>
+      <Link to={`/login`} className="hover:bg-gray-700 p-2 rounded">
+        Login
+      </Link>
     </div>
   );
 };
@@ -35,6 +186,7 @@ const Login = () => {
 const Profile = () => {
   const profilePicURL = localStorage.getItem("profilePicURL");
   const username = localStorage.getItem("username");
+
   return (
     <div className="flex">
       {profilePicURL ? (
@@ -58,51 +210,84 @@ const RegisterLogin = () => {
   );
 };
 
-const ServicesAfterLogin = () => {
+const Logout = ({ onLogout }) => {
+  const handleLogout = () => {
+    localStorage.setItem("isLoggedIn", "false");
+    onLogout(); // Trigger state update in parent component
+  };
+
+  return (
+    <div className="text-white px-4 py-2">
+      <button className="hover:bg-gray-700 p-2 rounded" onClick={handleLogout}>
+        Log Out
+      </button>
+    </div>
+  );
+};
+
+const ServicesAfterLogin = ({ onLogout }) => {
   return (
     <>
       <div className="text-white px-4 py-2">
-        <a href="#services" className="hover:bg-gray-700 p-2 rounded">
+        <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
           Edit Profile
-        </a>
+        </Link>
       </div>
       <div className="text-white px-4 py-2">
-        <a href="#services" className="hover:bg-gray-700 p-2 rounded">
+        <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
           Wallet
-        </a>
+        </Link>
       </div>
       <div className="text-white px-4 py-2">
-        <a href="#services" className="hover:bg-gray-700 p-2 rounded">
+        <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
           Messages
-        </a>
+        </Link>
       </div>
-      <div className="text-white px-4 py-2">
-        <a href="#services" className="hover:bg-gray-700 p-2 rounded">
-          Log Out
-        </a>
-      </div>
+      <Logout onLogout={onLogout} />
       <Profile />
     </>
   );
 };
 
 const Links = () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+
+  // Sync localStorage with state
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Cleanup listener on unmount
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
 
   return (
     <div className="flex space-x-4">
       <div className="text-white px-4 py-2">
-        <a className="hover:bg-gray-700 p-2 rounded">Home</a>
+        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>Home</Link>
       </div>
       <div className="text-white px-4 py-2">
-        <a className="hover:bg-gray-700 p-2 rounded">About Us</a>
+        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>About Us</Link>
       </div>
       <div className="text-white px-4 py-2">
-        <a href="#services" className="hover:bg-gray-700 p-2 rounded">
+        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>
           Contact Us
-        </a>
+        </Link>
       </div>
-      {isLoggedIn ? <ServicesAfterLogin /> : <RegisterLogin />}
+      {isLoggedIn ? (
+        <ServicesAfterLogin onLogout={handleLogout} />
+      ) : (
+        <RegisterLogin />
+      )}
     </div>
   );
 };
@@ -112,8 +297,6 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 flex bg-gray-800 p-4">
       <NavBarImage source={ASSETS.logo} />
       <div className="ml-auto">
-        {" "}
-        {/* Added this div to push links to the right */}
         <Links />
       </div>
     </nav>
