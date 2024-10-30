@@ -19,7 +19,8 @@ from jobs import fetch_job, create_job, search_jobs, apply_job, posted_jobs, ass
 from messages import message, get_conversation, get_all_messages 
 
 load_dotenv()
-MONGODB_URI = "mongodb+srv://Project1:Radhika@cluster.urbb9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster&tls=true&tlsAllowInvalidCertificates=true"
+MONGODB_URI = os.getenv("MONGODB_URI")
+
 client = MongoClient(MONGODB_URI)
 
 
