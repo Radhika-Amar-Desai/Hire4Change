@@ -17,7 +17,7 @@ function NavBarImage({ source }) {
 const Register = () => {
   return (
     <div className="text-white px-4 py-2">
-      <Link to={'/register'} className="hover:bg-gray-700 p-2 rounded">
+      <Link to={"/register"} className="hover:bg-gray-700 p-2 rounded">
         Register
       </Link>
     </div>
@@ -80,7 +80,7 @@ const ServicesAfterLogin = ({ onLogout }) => {
   return (
     <>
       <div className="text-white px-4 py-2">
-        <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
+        <Link to={`/profile`} className="hover:bg-gray-700 p-2 rounded">
           Edit Profile
         </Link>
       </div>
@@ -101,7 +101,9 @@ const ServicesAfterLogin = ({ onLogout }) => {
 };
 
 const Links = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("isLoggedIn") === "true");
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("isLoggedIn") === "true"
+  );
 
   // Sync localStorage with state
   useEffect(() => {
@@ -124,10 +126,14 @@ const Links = () => {
   return (
     <div className="flex space-x-4">
       <div className="text-white px-4 py-2">
-        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>Home</Link>
+        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>
+          Home
+        </Link>
       </div>
       <div className="text-white px-4 py-2">
-        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>About Us</Link>
+        <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>
+          About Us
+        </Link>
       </div>
       <div className="text-white px-4 py-2">
         <Link className="hover:bg-gray-700 p-2 rounded" to={`/`}>

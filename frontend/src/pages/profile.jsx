@@ -4,6 +4,28 @@ import API_ENDPOINTS from "../config/apiConfig";
 
 const VarContext = createContext();
 
+const EditableInput = ({field, defaultVal, style}) => {
+  const [data, setData] = useState(defaultVal); // Replace "Initial Value" with any initial value you prefer.
+
+  return (
+    <input
+      className={"focus:outline-none " + style}
+      type="text"
+      name={field}
+      value={data}
+      onChange={(e) => setData(e.target.value)} // Updates the state with user input
+    />
+  );
+}
+
+const SubmitButton = ({content, additionalStyle, handleSubmit}) => {
+  return (
+    <button type="submit" className={"bg-blue-500 text-white py-2 px-4 rounded " + additionalStyle} onClick={handleSubmit}>
+      {content}
+    </button>
+  )
+}
+
 function isAJob(str) {
   return str.toLowerCase().endsWith("jobs");
 }
@@ -23,20 +45,20 @@ function camelCaseToTitle(str) {
 }
 
 const Job_content = ({ jobData }) => {
-    const {
-        userData,
-        setUserData,
-        error,
-        setError,
-        activeTab,
-        setActiveTab,
-        isJobsMenuOpen,
-        setIsJobsMenuOpen,
-        handleJobClick,
-        handlePortfolioSubmit,
-        handleJobMenuClick,
-        handleWorkExperienceSubmit,
-    } = useContext(VarContext);
+  const {
+    userData,
+    setUserData,
+    error,
+    setError,
+    activeTab,
+    setActiveTab,
+    isJobsMenuOpen,
+    setIsJobsMenuOpen,
+    handleJobClick,
+    handlePortfolioSubmit,
+    handleJobMenuClick,
+    handleWorkExperienceSubmit,
+  } = useContext(VarContext);
   // console.log(jobData);
   return (
     <>
@@ -54,7 +76,8 @@ const Job_content = ({ jobData }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {jobData.map((job) => (
-              <tr key={job.title} onClick={() => handleJobClick(job.job)}>
+              // <tr key={job.title} onClick={() => handleJobClick(job.job)}>
+              <tr key={job.title}>
                 <td className="px-6 py-4 whitespace-nowrap text-[1vw] font-medium text-gray-900">
                   {job.job}
                 </td>
@@ -209,10 +232,12 @@ const ProfileSectionImage = ({ imageSrc }) => {
 
 const ProfileDataRow = ({ field, data }) => {
   return (
-    <tr className="h-[5vw]">
-      <th className="text-[1.5vw] font-normal p-4 whitespace-nowrap">{field}</th>
-      <td className="text-[1vw] text-gray-400">{data}</td>
-    </tr>
+    <div className="h-[5vw] flex">
+      <label className="text-[1.5vw] font-normal p-4 whitespace-nowrap">
+        {field}
+      </label>
+      <EditableInput defaultVal={data} field={field} style="text-[1.5vw] text-gray-400 ml-auto"/>
+    </div>
   );
 };
 
@@ -220,11 +245,10 @@ const ProfileSection = ({ userData }) => {
   return (
     <div className="grid grid-cols-2">
       <div className="flex items-center">
-        <ProfileSectionImage
-          imageSrc={userData?.profilePictureUrl}/>
+        <ProfileSectionImage imageSrc={userData?.profilePictureUrl} />
       </div>
 
-      <table className="divide-y divide-gray-200">
+      <form className="divide-y divide-gray-200">
         <ProfileDataRow field="Username" data={userData?.username} />
         <ProfileDataRow field="Email" data={userData?.email} />
         <ProfileDataRow field="Phone Number" data={userData?.phoneNumber} />
@@ -242,7 +266,8 @@ const ProfileSection = ({ userData }) => {
           field="Languages"
           data={userData?.languages?.join(", ")}
         />
-      </table>
+        <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"}/>
+      </form>
     </div>
   );
 };
@@ -312,9 +337,7 @@ const TableRow = ({ row_content }) => {
   return (
     <tr className="h-10">
       {row_content.map((item, index) => (
-        <td key={index} className="text-center text-[1.5vw] sm:text-[1vw]">
-          {item}
-        </td>
+        <td className="text-center"><EditableInput defaultVal={item} style={"text-center w-full"}/></td>
       ))}
     </tr>
   );
@@ -358,7 +381,10 @@ const Education = ({ userData }) => {
     <div className="space-y-[1vw]">
       <div className="sm:text-[4vw] lg:text-[2vw] font-semibold">Education</div>
       {data.length != 0 ? (
-        <Table titles={titles} data={data} />
+        <div>
+          <Table titles={titles} data={data} />
+          <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"} />
+        </div>
       ) : (
         <p>No Education Available</p>
       )}
@@ -378,7 +404,10 @@ const Review = ({ userData }) => {
     <div className="space-y-[1vw]">
       <div className="sm:text-[4vw] lg:text-[2vw] font-semibold">Reviews</div>
       {data.length != 0 ? (
-        <Table titles={titles} data={data} />
+        <div>
+          <Table titles={titles} data={data} />
+          <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"}/>
+        </div>
       ) : (
         <p>No Reviews Available</p>
       )}
