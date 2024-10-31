@@ -8,6 +8,7 @@ from flask import jsonify
 import traceback
 
 def message(data, messages, upload_image, logger):
+    
     try:
 
         sender = data['sender']
@@ -117,6 +118,7 @@ def get_conversation(data, messages, logger):
         logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500   
 
+
 def get_all_messages(data, messages, logger):
     try:
         username = data['username']
@@ -152,3 +154,4 @@ def get_all_messages(data, messages, logger):
         logger.error(f"Unexpected error: {str(e)}")
         logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+    

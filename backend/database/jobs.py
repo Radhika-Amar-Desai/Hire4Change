@@ -355,6 +355,8 @@ def assign_jobs(data, users, jobs, transactions, logger):
         logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+
+
 def complete_job(data, users, jobs, transactions, logger):
     try:
         job_id = data.get('jobId')

@@ -15,8 +15,10 @@ import traceback
 import hashlib
 
 load_dotenv()
-MONGODB_URI = "mongodb+srv://Project1:Radhika@cluster.urbb9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster&tls=true&tlsAllowInvalidCertificates=true"
+MONGODB_URI = os.getenv("MONGODB_URI")
+
 client = MongoClient(MONGODB_URI)
+
 
 initialize_app()
 app = Flask(__name__)
@@ -57,6 +59,107 @@ def serialize(data):
 
 @app.route("/profile", methods=['GET'])
 def profile():
+    """
+    curl -X GET "http://localhost:5000/profile?username=<username>"
+
+    Response:
+
+    {
+  "activeJobs": [
+    {
+      "jobId": "unique_job_id_1",
+      "role": "app developer"
+    }
+  ],
+  "bio": "An experienced freelancer specializing in various domains including web development and digital marketing.",
+  "completedJobs": [
+    {
+      "jobId": "unique_job_id_2",
+      "role": "web developer"
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor Of Science",
+      "fieldOfStudy": "Computer Science",
+      "startDate": "2016-08-01T00:00:00Z",
+      "institution": "University of Example",
+      "endDate": "2020-05-01T00:00:00Z"
+    }
+  ],
+  "contactInfo": {
+    "email": "sample.email@example.com",
+    "phoneNumber": "+1234567890"
+  },
+  "languages": [
+    "English",
+    "Spanish"
+  ],
+  "portfolioItems": [
+    {
+      "title": "E-commerce Website",
+      "description": "A fully functional e-commerce site built with React and Node.js.",
+      "images": [
+        "https://example.com/portfolio/ecommerce1.jpg",
+        "https://example.com/portfolio/ecommerce2.jpg"
+      ],
+      "link": "https://ecommerce.example.com"
+    },
+    {
+      "title": "Another Project",
+      "description": "A description of the project goes here.",
+      "images": [
+        "https://example.com/portfolio/project1.jpg"
+      ],
+      "link": "https://project.example.com"
+    }
+  ],
+  "postedJobs": [
+    {
+      "jobId": "unique_job_id_3",
+      "role": "web developer"
+    }
+  ],
+  "profilePictureUrl": null,
+  "ratings": {
+    "asEmployer": 4.5,
+    "asFreelancer": 4.7
+  },
+  "reviews": [
+    {
+      "asEmployer": false,
+      "comment": "Excellent collaboration. Highly recommended!",
+      "date": "2024-09-15T00:00:00Z",
+      "jobId": "unique_job_id_4",
+      "rating": 5,
+      "reviewerId": "unique_reviewer_id_1"
+    }
+  ],
+  "savedJobs": [
+    {
+      "jobId": "unique_job_id_5",
+      "role": "app developer"
+    },
+    {
+      "jobId": "unique_job_id_6",
+      "role": "tester"
+    },
+    {
+      "jobId": "unique_job_id_7",
+      "jobTitle": "Home Plumbing Service"
+    }
+  ],
+  "skills": [
+    "JavaScript",
+    "React",
+    "Node.js",
+    "SEO"
+  ],
+  "username": "sampleUsername",
+  "workExperience": []
+}
+
+    """
     try:
         username = request.args.get('username')
         if not username:
@@ -96,6 +199,22 @@ def profile():
 
 @app.route("/add-portfolio", methods=['POST'])
 def add_portfolio():
+    """
+    curl -X POST "http://localhost:5000/add-portfolio" -H "Content-Type: application/json" -d '{
+  "username": "<username>",
+  "title": "<title>",
+  "description": "<description>",
+  "images": ["<image_url1>", "<image_url2>"],
+  "link": "<link>"
+        }'
+
+    Response:
+
+    {
+    "message": "Portfolio updated successfully!"
+    }
+
+    """
     try:
         data = request.json
         username = data.get('username')
@@ -123,6 +242,23 @@ def add_portfolio():
 
 @app.route("/add-work-experience", methods=['POST'])
 def add_work_experience():
+    """
+    
+    curl -X POST "http://localhost:5000/add-work-experience" -H "Content-Type: application/json" -d '{
+  "username": "<username>",
+  "title": "<title>",
+  "company": "<company>",
+  "location": "<location>",
+  "from": "<from_date>",
+  "to": "<to_date>",
+  "description": "<description>"
+    }'
+
+    Response:  
+        {
+    "message": "Work experience added successfully!"
+    }
+    """
     try:
         data = request.json
         username = data.get('username')
@@ -167,8 +303,21 @@ def add_work_experience():
         app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+
 @app.route("/delete-work-experience", methods=['DELETE'])
 def delete_work_experience():
+    """
+    curl -X DELETE "http://localhost:5000/delete-work-experience" -H "Content-Type: application/json" -d '{
+    "username": "<username>",
+    "id": "<experience_id>"
+    }'
+
+    Response:
+    {
+    "message": "Work experience deleted successfully!"
+    }
+
+    """
     try:
         data = request.json
         username = data.get('username')
@@ -196,6 +345,22 @@ def delete_work_experience():
 
 @app.route("/update-work-experience", methods=['POST'])
 def update_work_experience():
+    """
+    curl -X POST "http://localhost:5000/update-work-experience" -H "Content-Type: application/json" -d '{
+  "username": "<username>",
+  "id": "<experience_id>",
+  "title": "<new_title>",
+  "company": "<new_company>",
+  "location": "<new_location>",
+  "from": "<new_from_date>",
+  "to": "<new_to_date>",
+  "description": "<new_description>"
+}'
+    Response:
+    {
+    "message": "Work experience updated successfully!"
+    }
+    """
     try:
         data = request.json
         username = data.get('username')
@@ -254,6 +419,32 @@ def get_data():
 
 @app.route("/add-data", methods=['POST'])
 def add_data():
+    """
+    curl -X POST "http://localhost:5000/add-data" -H "Content-Type: application/json" -d '{
+  "username": "<username>",
+  "email": "<email>",
+  "phoneNumber": "<phone_number>",
+  "bio": "<bio>",
+  "skills": ["<skill1>", "<skill2>"],
+  "languages": ["<language1>", "<language2>"],
+  "workExperience": [],
+  "portfolioItems": [],
+  "ratings": {
+    "asEmployer": 0,
+    "asFreelancer": 0
+  },
+  "completedJobs": [],
+  "reviews": [],
+  "activeJobs": [],
+  "savedJobs": [],
+  "postedJobs": [],
+  "profilePicture": "<profile_picture_url>",
+  "education": [],
+  "createdAt": "<created_date>",
+  "lastActive": "<last_active_date>"
+}'
+
+    """
     try:
         data = request.json
         if not data:
@@ -292,6 +483,16 @@ def add_data():
 
 @app.route("/check-username", methods=['GET'])
 def check_username():
+    """
+    curl -X GET "http://localhost:5000/check-username?username=<username>"
+
+    Response:
+    
+        {
+    "exists": true
+    }
+
+    """
     try:
         username = request.args.get('username')
         if not username:
@@ -310,6 +511,17 @@ def check_username():
 
 @app.route("/search_users",methods=["POST"])
 def search_users_route():
+    """
+    curl -X POST "http://localhost:5000/search_users" -H "Content-Type: application/json" -d '{
+  "query": "<search_query>",
+  "filters": {
+    "location": "<location_filter>"
+  },
+  "sort_by": "ratings.asFreelancer",
+  "sort_order": "desc"
+}'
+
+    """
     data=request.json
     try:
         query = data.get('query', '')
@@ -382,8 +594,37 @@ def search_users_route():
         app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+
+
 @app.route("/add-image", methods=['POST'])
 def append_image():
+    """
+    curl -X POST http://localhost:5000/add-image \
+-H "Content-Type: application/json" \
+-d '{
+  "images": [
+    {
+      "image": "<base64_encoded_image_1>"
+    },
+    {
+      "image": "<base64_encoded_image_2>"
+    }
+  ]
+}'
+
+    Response:
+
+    {
+    "urls": [
+        "https://storage.googleapis.com/bucket_name/images/unique_image_id_1.jpg",
+        "https://storage.googleapis.com/bucket_name/images/unique_image_id_2.jpg
+
+    ]
+}
+
+
+
+    """
     try:
         data = request.json
         if not data or 'images' not in data:
@@ -406,8 +647,24 @@ def append_image():
         app.logger.error(traceback.format_exc())  # Log the full traceback
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 
+
 @app.route("/login", methods=['POST'])
 def login():
+    """
+    curl -X POST http://localhost:5000/login \
+-H "Content-Type: application/json" \
+-d '{
+  "username": "exampleUsername",
+  "email": "example@example.com",
+  "password": "examplePassword"
+}'
+
+    {
+  "message": "Login successful"
+}
+
+    
+    """
     try:
         data = request.json
         username = data.get('username')
@@ -431,7 +688,7 @@ def login():
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-@https_fn.on_request()
-def user(req: https_fn.Request) -> https_fn.Response:
-    with app.request_context(req.environ):
-        return app.full_dispatch_request()
+# @https_fn.on_request()
+# def user(req: https_fn.Request) -> https_fn.Response:
+#     with app.request_context(req.environ):
+#         return app.full_dispatch_request()

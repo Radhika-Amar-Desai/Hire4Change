@@ -1,2 +1,3 @@
 env/
 backend/database/.env 
+backend/users/.env
