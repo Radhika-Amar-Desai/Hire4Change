@@ -7,6 +7,7 @@ import JobDetails from "../src/pages/JobDetails.jsx";
 import Chat from "../src/pages/Chat.jsx";
 import Login from "../src/pages/Login.jsx";
 import Register from "./pages/Register.jsx";
+import Profile from "./pages/profile.jsx";
 
 const WebRoutes = () => {
   const location = useLocation();
@@ -19,6 +20,7 @@ const WebRoutes = () => {
       <Route path="/messages" element={<Chat />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />}/>
+      <Route path="/profile" element={<Profile/>}/>
       {/* <Route path="/profile" element={<Profile />} />
         <Route path="/add" element={<NewGig />} />
         <Route path="/mygigs" element={<MyGigs />} />
