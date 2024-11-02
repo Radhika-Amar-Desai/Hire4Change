@@ -10,7 +10,7 @@ const API_ENDPOINTS = {
   add_portfolio: `${API_BASE_URL_USER}/add-portfolio`,
   add_work_experience: `${API_BASE_URL_USER}/add-work-experience`,
   search_job_listing: `${API_BASE_URL_DATABASE}/search-job-listing`,
-  create_job: `${API_BASE_URL_DATABASE}/create-job`,
+  create_job: `${API_BASE_URL_DATABASE}/create-job-listing`,
   fetch_job: `${API_BASE_URL_DATABASE}/fetch-job`,
   apply_job: `${API_BASE_URL_DATABASE}/apply-job`,
   assign_job: `${API_BASE_URL_DATABASE}/assign_job`,

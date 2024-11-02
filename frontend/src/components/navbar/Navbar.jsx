@@ -90,8 +90,13 @@ const ServicesAfterLogin = ({ onLogout }) => {
         </Link>
       </div>
       <div className="text-white px-4 py-2">
-        <Link to={`/`} className="hover:bg-gray-700 p-2 rounded">
+        <Link to={`/messages`} className="hover:bg-gray-700 p-2 rounded">
           Messages
+        </Link>
+      </div>
+      <div className="text-white px-4 py-2">
+        <Link to={`/postJobs`} className="hover:bg-gray-700 p-2 rounded">
+          Post Jobs
         </Link>
       </div>
       <Logout onLogout={onLogout} />

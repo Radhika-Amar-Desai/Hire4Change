@@ -4,7 +4,7 @@ import API_ENDPOINTS from "../config/apiConfig";
 
 const VarContext = createContext();
 
-const EditableInput = ({field, defaultVal, style}) => {
+const EditableInput = ({ field, defaultVal, style }) => {
   const [data, setData] = useState(defaultVal); // Replace "Initial Value" with any initial value you prefer.
 
   return (
@@ -16,15 +16,19 @@ const EditableInput = ({field, defaultVal, style}) => {
       onChange={(e) => setData(e.target.value)} // Updates the state with user input
     />
   );
-}
+};
 
-const SubmitButton = ({content, additionalStyle, handleSubmit}) => {
+const SubmitButton = ({ content, additionalStyle, handleSubmit }) => {
   return (
-    <button type="submit" className={"bg-blue-500 text-white py-2 px-4 rounded " + additionalStyle} onClick={handleSubmit}>
+    <button
+      type="submit"
+      className={"bg-blue-500 text-white py-2 px-4 rounded " + additionalStyle}
+      onClick={handleSubmit}
+    >
       {content}
     </button>
-  )
-}
+  );
+};
 
 function isAJob(str) {
   return str.toLowerCase().endsWith("jobs");
@@ -236,7 +240,11 @@ const ProfileDataRow = ({ field, data }) => {
       <label className="text-[1.5vw] font-normal p-4 whitespace-nowrap">
         {field}
       </label>
-      <EditableInput defaultVal={data} field={field} style="text-[1.5vw] text-gray-400 ml-auto"/>
+      <EditableInput
+        defaultVal={data}
+        field={field}
+        style="text-[1.5vw] text-gray-400 ml-auto"
+      />
     </div>
   );
 };
@@ -266,7 +274,10 @@ const ProfileSection = ({ userData }) => {
           field="Languages"
           data={userData?.languages?.join(", ")}
         />
-        <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"}/>
+        <SubmitButton
+          content={"Submit Changes"}
+          additionalStyle={"w-full mt-4"}
+        />
       </form>
     </div>
   );
@@ -337,7 +348,9 @@ const TableRow = ({ row_content }) => {
   return (
     <tr className="h-10">
       {row_content.map((item, index) => (
-        <td className="text-center"><EditableInput defaultVal={item} style={"text-center w-full"}/></td>
+        <td className="text-center">
+          <EditableInput defaultVal={item} style={"text-center w-full"} />
+        </td>
       ))}
     </tr>
   );
@@ -383,7 +396,10 @@ const Education = ({ userData }) => {
       {data.length != 0 ? (
         <div>
           <Table titles={titles} data={data} />
-          <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"} />
+          <SubmitButton
+            content={"Submit Changes"}
+            additionalStyle={"w-full mt-4"}
+          />
         </div>
       ) : (
         <p>No Education Available</p>
@@ -406,7 +422,10 @@ const Review = ({ userData }) => {
       {data.length != 0 ? (
         <div>
           <Table titles={titles} data={data} />
-          <SubmitButton content={"Submit Changes"} additionalStyle={"w-full mt-4"}/>
+          <SubmitButton
+            content={"Submit Changes"}
+            additionalStyle={"w-full mt-4"}
+          />
         </div>
       ) : (
         <p>No Reviews Available</p>
