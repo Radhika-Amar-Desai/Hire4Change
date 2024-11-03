@@ -7,6 +7,8 @@ import JobDetails from "../src/pages/JobDetails.jsx";
 import Chat from "../src/pages/Chat.jsx";
 import Login from "../src/pages/Login.jsx";
 import Register from "./pages/Register.jsx";
+import UserRegister from "./pages/UserRegister.jsx";
+import OrgRegister from "./pages/OrgRegister.jsx";
 import Profile from "./pages/profile.jsx";
 import PostJobs from "./pages/PostJobs.jsx";
 
@@ -21,13 +23,11 @@ const WebRoutes = () => {
       <Route path="/messages" element={<Chat />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/user-register" element={<UserRegister />} />
+      <Route path="/org-register" element={<OrgRegister />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/postJobs" element={<PostJobs />} />
-      {/* <Route path="/profile" element={<Profile />} />
-        <Route path="/add" element={<NewGig />} />
-        <Route path="/mygigs" element={<MyGigs />} />
-        <Route path="/wallet" element={<Wallet />} /> */}
-      {/* Ensure the correct path for Gig */}
     </Routes>
   );
 };
