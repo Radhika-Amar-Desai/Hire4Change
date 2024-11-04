@@ -46,7 +46,13 @@ const Profile = () => {
         <NavBarImage source={ASSETS.defaultProfilePic} />
       )} */}
       <div className="text-white px-4 py-2">
-        <span> <button className="hover:bg-gray-700 p-2 rounded font-bold" > {username} </button> </span>
+        <span>
+          {" "}
+          <button className="hover:bg-gray-700 p-2 rounded font-bold">
+            {" "}
+            {username}{" "}
+          </button>{" "}
+        </span>
       </div>
     </div>
   );
@@ -80,27 +86,30 @@ const ServicesForOrganization = ({ onLogout }) => {
   return (
     <>
       <div className="text-white px-4 py-2">
-        <Link to={`/member_information`} className="hover:bg-gray-700 p-2 rounded">
-          Member Information
+        <Link to={`/member_information`}>
+          <button className="hover:bg-gray-700 p-2 rounded"> Member Information </button>
         </Link>
       </div>
       <div className="text-white px-4 py-2">
-        <Link to={`/postJobs`} className="hover:bg-gray-700 p-2 rounded">
-          Post Jobs
+        <Link to={`/postJobs`}>
+          <button className="hover:bg-gray-700 p-2 rounded"> Post Jobs </button>
         </Link>
       </div>
       <Logout onLogout={onLogout} />
       <Profile />
     </>
   );
-}
+};
 
 const ServicesForIndividuals = ({ onLogout }) => {
   return (
     <>
       <div className="text-white px-4 py-2">
         <Link to={`/profile`} className="hover:bg-gray-700 p-2 rounded">
-          <button className="hover:bg-gray-700 p-2 rounded"> Edit Profile </button>
+          <button className="hover:bg-gray-700 p-2 rounded">
+            {" "}
+            Edit Profile{" "}
+          </button>
         </Link>
       </div>
       {/* <div className="text-white px-4 py-2">
@@ -115,7 +124,7 @@ const ServicesForIndividuals = ({ onLogout }) => {
       </div>
       <div className="text-white px-4 py-2">
         <Link to={`/postJobs`}>
-          <button className="hover:bg-gray-700 p-2 rounded">Post Jobs</button>
+          <button className="hover:bg-gray-700 p-2 rounded"> Post Jobs </button>
         </Link>
       </div>
       {/* <Logout onLogout={onLogout} /> */}
@@ -133,7 +142,11 @@ const ServicesForIndividuals = ({ onLogout }) => {
 const ServicesAfterLogin = ({ onLogout, userType }) => {
   return (
     <>
-      {userType == "org" ? <ServicesForOrganization onLogout={onLogout}/>:<ServicesForIndividuals onLogout={onLogout}/>}
+      {userType == "org" ? (
+        <ServicesForOrganization onLogout={onLogout} />
+      ) : (
+        <ServicesForIndividuals onLogout={onLogout} />
+      )}
     </>
   );
 };
@@ -143,10 +156,8 @@ const Links = () => {
     localStorage.getItem("isLoggedIn") === "true"
   );
 
-  const [userType, setUserType] = useState(
-    localStorage.getItem("userType")
-  );
- 
+  const [userType, setUserType] = useState(localStorage.getItem("userType"));
+
   // Sync localStorage with state
   useEffect(() => {
     const handleStorageChange = () => {
@@ -170,17 +181,20 @@ const Links = () => {
     <div className="flex space-x-4">
       <div className="text-white px-4 py-2">
         <Link to={`/`}>
-          <button className="hover:bg-gray-700 p-2 rounded" > Home </button>
+          <button className="hover:bg-gray-700 p-2 rounded"> Home </button>
         </Link>
       </div>
       <div className="text-white px-4 py-2">
         <Link to={`/`}>
-          <button className="hover:bg-gray-700 p-2 rounded" > About Us </button>
+          <button className="hover:bg-gray-700 p-2 rounded"> About Us </button>
         </Link>
       </div>
       <div className="text-white px-4 py-2">
         <Link to={`/`}>
-          <button className="hover:bg-gray-700 p-2 rounded" > Contact Us </button>
+          <button className="hover:bg-gray-700 p-2 rounded">
+            {" "}
+            Contact Us{" "}
+          </button>
         </Link>
       </div>
       {isLoggedIn ? (
