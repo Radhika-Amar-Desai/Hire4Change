@@ -549,14 +549,6 @@ def add_to_wallet():
 
 
 
-
-
-
-
-
-
-
-
 def serialize(data):
     """Recursively converts ObjectId fields to strings in a given dictionary."""
     if isinstance(data, dict):
