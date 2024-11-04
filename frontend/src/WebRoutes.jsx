@@ -12,6 +12,7 @@ import UserRegister from "./pages/UserRegister.jsx";
 import OrgRegister from "./pages/OrgRegister.jsx";
 import Profile from "./pages/profile.jsx";
 import PostJobs from "./pages/PostJobs.jsx";
+import MemberInfo from "./pages/MemberInformation.jsx";
 
 const WebRoutes = () => {
   const location = useLocation();
@@ -29,7 +30,8 @@ const WebRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/postJobs" element={<PostJobs />} />
-      <Route path="/user-login" element={<UserLogin/>}/>
+      <Route path="/user-login" element={<UserLogin />} />
+      <Route path="/member-information" element={<MemberInfo />}/>
     </Routes>
   );
 };

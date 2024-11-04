@@ -86,8 +86,11 @@ const ServicesForOrganization = ({ onLogout }) => {
   return (
     <>
       <div className="text-white px-4 py-2">
-        <Link to={`/member_information`}>
-          <button className="hover:bg-gray-700 p-2 rounded"> Member Information </button>
+        <Link to={`/member-information`}>
+          <button className="hover:bg-gray-700 p-2 rounded">
+            {" "}
+            Member Information{" "}
+          </button>
         </Link>
       </div>
       <div className="text-white px-4 py-2">

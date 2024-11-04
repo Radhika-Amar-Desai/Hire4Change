@@ -15,6 +15,7 @@ import base64
 from uuid import uuid4
 import traceback
 import hashlib
+from flask_pymongo import PyMongo
 
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI")
@@ -693,16 +694,6 @@ def login():
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-
-
-from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
-import base64
-import pandas as pd
-from uuid import uuid4
-from google.cloud import storage
-import os
-
 app = Flask(__name__)
 
 # MongoDB configuration
@@ -730,7 +721,7 @@ def upload_image(image_data):
         app.logger.error(f"Error uploading image: {str(e)}")
         return None
 
-@app.route('/api/register_org', methods=['POST'])
+@app.route('/register_org', methods=['POST'])
 def register_org():
     data = request.get_json()
     
@@ -774,7 +765,6 @@ def register_org():
     db.Organisation.insert_one(org_data)
     
     return jsonify({"message": "Organisation registered successfully", "logoUrl": logo_url}), 201
-
 
 # @https_fn.on_request()
 # def user(req: https_fn.Request) -> https_fn.Response:
