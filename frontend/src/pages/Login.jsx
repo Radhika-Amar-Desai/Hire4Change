@@ -8,7 +8,7 @@ const Login = () => {
 
   const handleOrganizationClick = () => {
     localStorage.setItem("userType", "org");
-    navigate("/user-login"); // Route to Organization registration page
+    navigate("/org-login"); // Route to Organization registration page
   };
 
   const handleUserClick = () => {

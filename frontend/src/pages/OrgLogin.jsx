@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_ENDPOINTS from "../config/apiConfig";
 
-function UserLogin() {
+function OrgLogin() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState(""); // New state for email
   const [password, setPassword] = useState("");
@@ -19,7 +19,7 @@ function UserLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(API_ENDPOINTS.login, {
+      const response = await fetch(API_ENDPOINTS.login_org, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,4 +99,5 @@ function UserLogin() {
   );
 }
 
-export default UserLogin;
+export default OrgLogin;
+

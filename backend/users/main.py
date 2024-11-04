@@ -1,5 +1,5 @@
-from firebase_admin import initialize_app, storage
-from firebase_functions import https_fn
+# from firebase_admin import initialize_app, storage
+# from firebase_functions import https_fn
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
@@ -15,7 +15,6 @@ import base64
 from uuid import uuid4
 import traceback
 import hashlib
-from flask_pymongo import PyMongo
 
 load_dotenv()
 MONGODB_URI = os.getenv("MONGODB_URI")
@@ -23,9 +22,9 @@ MONGODB_URI = os.getenv("MONGODB_URI")
 client = MongoClient(MONGODB_URI)
 
 
-initialize_app()
+# initialize_app()
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# CORS(app, resources={r"/*": {"origins": "*"}})
 
 try:
     database = client.get_database("Users")

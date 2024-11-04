@@ -7,6 +7,7 @@ import JobDetails from "../src/pages/JobDetails.jsx";
 import Chat from "../src/pages/Chat.jsx";
 import Login from "../src/pages/Login.jsx";
 import UserLogin from "./pages/UserLogin.jsx";
+import OrgLogin from "./pages/OrgLogin.jsx";
 import Register from "./pages/Register.jsx";
 import UserRegister from "./pages/UserRegister.jsx";
 import OrgRegister from "./pages/OrgRegister.jsx";
@@ -23,15 +24,18 @@ const WebRoutes = () => {
       <Route path="/search" element={<Search />} />
       <Route path="/search/:id" element={<JobDetails />} />
       <Route path="/messages" element={<Chat />} />
+      
       <Route path="/login" element={<Login />} />
+      <Route path="/user-login" element={<UserLogin />} />
+      <Route path="/org-login" element={<OrgLogin />} />
+      
       <Route path="/register" element={<Register />} />
       <Route path="/user-register" element={<UserRegister />} />
       <Route path="/org-register" element={<OrgRegister />} />
-      <Route path="/register" element={<Register />} />
+      
       <Route path="/profile" element={<Profile />} />
       <Route path="/postJobs" element={<PostJobs />} />
-      <Route path="/user-login" element={<UserLogin />} />
-      <Route path="/member-information" element={<MemberInfo />}/>
+      <Route path="/member-information" element={<MemberInfo />} />
     </Routes>
   );
 };
