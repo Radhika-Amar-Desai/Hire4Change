@@ -756,6 +756,28 @@ def register_org():
 
 @app.route('/get_users/<org_username>', methods=['GET'])
 def get_users(org_username):
+    """
+    
+    curl -X GET http://127.0.0.1:5000/get_users/test    
+{
+  "orgUsername": "test",
+  "userRecords": [
+    {
+      "email": "adi@gmail.com",
+      "phoneNumber": 9838488484,
+      "username": "aadi",
+      "wallet": 300
+    },
+    {
+      "email": "neh@gma.com",
+      "phoneNumber": 8493849383,
+      "username": "nehal",
+      "wallet": 500
+    }
+  ]
+}
+
+    """
     try:
         organization = organisation_collection.find_one({"orgUsername": org_username})
         
