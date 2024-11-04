@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 import os
+import bcrypt
+import pandas as pd
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
@@ -648,22 +650,21 @@ def append_image():
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
 
 
+
 @app.route("/login", methods=['POST'])
 def login():
     """
     curl -X POST http://localhost:5000/login \
--H "Content-Type: application/json" \
--d '{
-  "username": "exampleUsername",
-  "email": "example@example.com",
-  "password": "examplePassword"
-}'
+    -H "Content-Type: application/json" \
+    -d '{
+      "username": "exampleUsername",
+      "email": "example@example.com",
+      "password": "examplePassword"
+    }'
 
     {
-  "message": "Login successful"
-}
-
-    
+      "message": "Login successful"
+    }
     """
     try:
         data = request.json
@@ -675,10 +676,14 @@ def login():
             return jsonify({"error": "Missing credentials"}), 400
 
         user = collection.find_one({"username": username, "email": email})
-        if user and user.get('password') == password:
-            return jsonify({"message": "Login successful"}), 200
+        if user:
+            if bcrypt.checkpw(password.encode('utf-8'), user.get('password').encode('utf-8')):
+                profilePicture = user.get('profilePicture')
+                return jsonify({"message": "Login successful", "profilePicture": profilePicture}), 200
+            else:
+                return jsonify({"error": "Invalid credentials"}), 401
         else:
-            return jsonify({"error": "Invalid credentials or user does not exist"}), 401
+            return jsonify({"error": "User does not exist"}), 401
 
     except PyMongoError as e:
         app.logger.error(f"Database error: {str(e)}")
@@ -688,7 +693,95 @@ def login():
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+
+
+from flask import Flask, request, jsonify
+from flask_pymongo import PyMongo
+import base64
+import pandas as pd
+from uuid import uuid4
+from google.cloud import storage
+import os
+
+app = Flask(__name__)
+
+# MongoDB configuration
+app.config["MONGO_URI"] = "mongodb://localhost:27017/your_database"
+mongo = PyMongo(app)
+
+# Firebase storage setup (Ensure credentials JSON file is set up and accessible)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path/to/your-firebase-credentials.json"
+storage_client = storage.Client()
+
+# Function to upload image to Firebase Storage
+def upload_image(image_data):
+    try:
+        image_bytes = base64.b64decode(image_data)
+        filename = f"images/{uuid4()}.jpg"
+        bucket = storage_client.bucket("your-firebase-bucket-name")
+        
+        blob = bucket.blob(filename)
+        blob.upload_from_string(image_bytes, content_type='image/jpeg')
+        
+        blob.make_public()
+        
+        return blob.public_url
+    except Exception as e:
+        app.logger.error(f"Error uploading image: {str(e)}")
+        return None
+
+@app.route('/api/register_org', methods=['POST'])
+def register_org():
+    data = request.get_json()
+    
+    org_name = data.get('orgName')
+    org_username = data.get('orgUsername')
+    contact_number = data.get('contactNumber')
+    email = data.get('email')
+    logo = data.get('logo')  
+    excel_data = data.get('excelFile')  
+    
+    db = mongo.db
+    if 'Organisation' not in db.list_collection_names():
+        db.create_collection('Organisation')
+    
+    existing_org = db.Organisation.find_one({"orgUsername": org_username})
+    if existing_org:
+        return jsonify({"message": "Organisation with this username already exists"}), 400
+    
+    logo_url = upload_image(logo) if logo else None
+    if not logo_url:
+        return jsonify({"message": "Failed to upload logo image"}), 500
+    
+    if excel_data:
+        try:
+            excel_bytes = base64.b64decode(excel_data)
+            df = pd.read_excel(excel_bytes)
+            
+            user_records = df.to_dict(orient='records')
+            db.Users.insert_many(user_records)
+        except Exception as e:
+            app.logger.error(f"Error processing Excel file: {str(e)}")
+            return jsonify({"message": "Failed to process Excel file"}), 500
+
+    org_data = {
+        "orgName": org_name,
+        "orgUsername": org_username,
+        "contactNumber": contact_number,
+        "email": email,
+        "logoUrl": logo_url
+    }
+    db.Organisation.insert_one(org_data)
+    
+    return jsonify({"message": "Organisation registered successfully", "logoUrl": logo_url}), 201
+
+
 # @https_fn.on_request()
 # def user(req: https_fn.Request) -> https_fn.Response:
 #     with app.request_context(req.environ):
 #         return app.full_dispatch_request()
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
