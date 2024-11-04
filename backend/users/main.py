@@ -28,6 +28,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 try:
     database = client.get_database("Users")
+    organisation_collection = database.get_collection("Organisation")
     collection = database.get_collection("Users")
 except PyMongoError as e:
     app.logger.error(f"Failed to connect to MongoDB: {str(e)}")
@@ -695,85 +696,79 @@ def login():
 
 
 
-from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
-import base64
-import pandas as pd
-from uuid import uuid4
-from google.cloud import storage
-import os
-
-app = Flask(__name__)
-
-# MongoDB configuration
-app.config["MONGO_URI"] = "mongodb://localhost:27017/your_database"
-mongo = PyMongo(app)
-
-# Firebase storage setup (Ensure credentials JSON file is set up and accessible)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path/to/your-firebase-credentials.json"
-storage_client = storage.Client()
-
-# Function to upload image to Firebase Storage
-def upload_image(image_data):
-    try:
-        image_bytes = base64.b64decode(image_data)
-        filename = f"images/{uuid4()}.jpg"
-        bucket = storage_client.bucket("your-firebase-bucket-name")
-        
-        blob = bucket.blob(filename)
-        blob.upload_from_string(image_bytes, content_type='image/jpeg')
-        
-        blob.make_public()
-        
-        return blob.public_url
-    except Exception as e:
-        app.logger.error(f"Error uploading image: {str(e)}")
-        return None
-
-@app.route('/api/register_org', methods=['POST'])
+@app.route('/register_org', methods=['POST'])
 def register_org():
-    data = request.get_json()
+    """
+    curl -X POST http://127.0.0.1:5000/register_org \
+    -F "orgName=Test Organization" \
+    -F "orgUsername=test_org" \
+    -F "contactNumber=1234567890" \
+    -F "email=test@example.com" \
+    -F "excelFile=@/path/to/your/excel_file.xlsx" \
+    -F "logo=$(base64 -w 0 /path/to/your/logo.jpg)"
+
+        Response:
+    {   
+    "message": "Organisation registered successfully"
+    }
+    """
+    org_name = request.form.get('orgName')
+    org_username = request.form.get('orgUsername')
+    contact_number = request.form.get('contactNumber')
+    email = request.form.get('email')
     
-    org_name = data.get('orgName')
-    org_username = data.get('orgUsername')
-    contact_number = data.get('contactNumber')
-    email = data.get('email')
-    logo = data.get('logo')  
-    excel_data = data.get('excelFile')  
-    
-    db = mongo.db
-    if 'Organisation' not in db.list_collection_names():
-        db.create_collection('Organisation')
-    
-    existing_org = db.Organisation.find_one({"orgUsername": org_username})
+    existing_org = organisation_collection.find_one({"orgUsername": org_username})
     if existing_org:
         return jsonify({"message": "Organisation with this username already exists"}), 400
+
+    user_records = []  
     
-    logo_url = upload_image(logo) if logo else None
-    if not logo_url:
-        return jsonify({"message": "Failed to upload logo image"}), 500
-    
-    if excel_data:
+    if 'excelFile' in request.files:
+        file = request.files['excelFile']
         try:
-            excel_bytes = base64.b64decode(excel_data)
-            df = pd.read_excel(excel_bytes)
-            
-            user_records = df.to_dict(orient='records')
-            db.Users.insert_many(user_records)
+            df = pd.read_excel(file)
+            user_records = df.to_dict(orient='records')  
         except Exception as e:
             app.logger.error(f"Error processing Excel file: {str(e)}")
             return jsonify({"message": "Failed to process Excel file"}), 500
+    else:
+        return jsonify({"message": "No Excel file uploaded"}), 400
+
+    logo_url = None
+    if 'logo' in request.form:
+        logo_data = request.form.get('logo')
+        logo_url = upload_image(logo_data)
+        if not logo_url:
+            return jsonify({"message": "Failed to upload logo image"}), 500
 
     org_data = {
         "orgName": org_name,
         "orgUsername": org_username,
         "contactNumber": contact_number,
         "email": email,
-        "logoUrl": logo_url
+        "userRecords": user_records,  
+        "logoUrl": logo_url          
     }
-    db.Organisation.insert_one(org_data)
+    organisation_collection.insert_one(org_data)
     
-    return jsonify({"message": "Organisation registered successfully", "logoUrl": logo_url}), 201
+    return jsonify({"message": "Organisation registered successfully"}), 201
+
+
+@app.route('/get_users/<org_username>', methods=['GET'])
+def get_users(org_username):
+    try:
+        organization = organisation_collection.find_one({"orgUsername": org_username})
+        
+        if not organization:
+            return jsonify({"message": "Organization not found"}), 404
+        
+        user_records = organization.get("userRecords", [])
+        
+        return jsonify({"orgUsername": org_username, "userRecords": user_records}), 200
+    
+    except Exception as e:
+        app.logger.error(f"Error retrieving user data: {str(e)}")
+        return jsonify({"message": "Failed to retrieve user data"}), 500
 
 
 # @https_fn.on_request()
