@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { useNavigate } from "react-router-dom";
 import API_ENDPOINTS from "../config/apiConfig";
+import { FaTrash } from 'react-icons/fa';
 
 const VarContext = createContext();
 
@@ -344,21 +345,31 @@ const ProfileNavBar = () => {
   );
 };
 
-const TableRow = ({ row_content }) => {
+
+
+const TableRow = ({ row_content, onDelete, rowIndex }) => {
   return (
     <tr className="h-10">
       {row_content.map((item, index) => (
-        <td className="text-center">
+        <td key={index} className="text-center">
           <EditableInput defaultVal={item} style={"text-center w-full"} />
         </td>
       ))}
+      {/* Updated delete button with a Font Awesome trash icon */}
+      <td className="text-center">
+        <button onClick={() => onDelete(rowIndex)} className="text-red-500 hover:text-red-700">
+          <FaTrash size={18} />
+        </button>
+      </td>
     </tr>
   );
 };
 
-const Table = ({ titles, data }) => {
+
+
+const Table = ({ titles, data, onDelete }) => {
   return (
-    <table className="w-full border-seperate border-spacing-4">
+    <table className="w-full border-separate border-spacing-4">
       <thead>
         <tr className="border-b border-gray-200">
           {titles.map((title, index) => (
@@ -369,44 +380,182 @@ const Table = ({ titles, data }) => {
               {title.toUpperCase()}
             </th>
           ))}
+          {/* Add an empty header for the delete button column */}
+          <th className="text-gray-400"></th>
         </tr>
       </thead>
 
       <tbody>
         {data.map((item, index) => (
-          <TableRow row_content={item} />
+          <TableRow
+            key={index}
+            row_content={item}
+            onDelete={onDelete}
+            rowIndex={index}
+          />
         ))}
       </tbody>
     </table>
   );
 };
 
-const Education = ({ userData }) => {
+
+
+const Education = ({ userData, setUserData }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [newEducation, setNewEducation] = useState({
+    degree: '',
+    institution: '',
+    fieldOfStudy: '',
+  });
+
   const titles = ["Degree", "Institution", "Field Of Study"];
-  // console.log(userData?.education);
   const data = userData?.education.map((edu) => [
     edu.degree,
     edu.institution,
     edu.fieldOfStudy,
   ]);
 
+  const handleDelete = async (index) => {
+    const deletedEducation = userData.education[index];
+    
+    // Update local state first
+    const updatedEducation = userData.education.filter((_, i) => i !== index);
+    setUserData({ ...userData, education: updatedEducation });
+  
+    // Send delete request to the backend
+    try {
+      const response = await fetch("http://localhost:5000/delete-education", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userData.username,  // Assuming `username` is part of `userData`
+          institution: deletedEducation.institution,
+          degree: deletedEducation.degree,
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Failed to delete education:", error);
+    }
+  };
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEducation({ ...newEducation, [name]: value });
+  };
+
+  const handleAddEducation = async () => {
+    // Update local state first
+    setUserData({
+      ...userData,
+      education: [...userData.education, newEducation],
+    });
+  
+    // Send data to the backend
+    try {
+      const response = await fetch("http://localhost:5000/add-education", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userData.username,  // Assuming `username` is part of `userData`
+          institution: newEducation.institution,
+          degree: newEducation.degree,
+          fieldOfStudy: newEducation.fieldOfStudy,
+          from: newEducation.from,      // Optional: Add these if available in `newEducation`
+          to: newEducation.to,          // Optional: Add these if available in `newEducation`
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Failed to add education:", error);
+    }
+  
+    // Reset form and hide it
+    setNewEducation({ degree: '', institution: '', fieldOfStudy: '' });
+    setShowForm(false);
+  };
+  
   return (
-    <div className="space-y-[1vw]">
-      <div className="sm:text-[4vw] lg:text-[2vw] font-semibold">Education</div>
-      {data.length != 0 ? (
+    <div className="space-y-6">
+      <div className="text-2xl font-semibold text-gray-800">Education</div>
+      {data.length !== 0 ? (
         <div>
-          <Table titles={titles} data={data} />
-          <SubmitButton
-            content={"Submit Changes"}
-            additionalStyle={"w-full mt-4"}
-          />
+          <Table titles={titles} data={data} onDelete={handleDelete} />
         </div>
       ) : (
-        <p>No Education Available</p>
+        <p className="text-gray-500 italic">No Education Available</p>
       )}
+
+      {/* Add Education Button */}
+      <button
+        onClick={() => setShowForm(!showForm)}
+        className="bg-white text-gray-600 border border-gray-300 font-medium px-6 py-2 mt-4 rounded-md hover:bg-gray-100 active:bg-gray-200 transition duration-200 ease-in-out"
+      >
+        + Add Education
+      </button>
+
+      {/* Conditionally Render Form */}
+      {showForm && (
+        <div className="mt-6 p-6 border rounded-lg bg-gray-100 space-y-4 shadow-lg">
+          <h3 className="text-xl font-semibold text-gray-700">Add New Education</h3>
+          <input
+            type="text"
+            name="degree"
+            placeholder="Degree"
+            value={newEducation.degree}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+          />
+          <input
+            type="text"
+            name="institution"
+            placeholder="Institution"
+            value={newEducation.institution}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+          />
+          <input
+            type="text"
+            name="fieldOfStudy"
+            placeholder="Field of Study"
+            value={newEducation.fieldOfStudy}
+            onChange={handleInputChange}
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+          />
+          <button
+            onClick={handleAddEducation}
+            className="bg-blue-600 text-white font-medium px-6 py-2 rounded-md hover:bg-blue-700 active:bg-blue-800 transition duration-200 ease-in-out"
+          >
+            Add Entry
+          </button>
+        </div>
+      )}
+      <SubmitButton
+        content={"Submit Changes"}
+        additionalStyle={"w-full mt-6 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium py-3 rounded-md transition duration-200 ease-in-out"}
+      />
     </div>
   );
 };
+
+
 
 const Review = ({ userData }) => {
   const titles = ["Comment", "Rating"];

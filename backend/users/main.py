@@ -793,6 +793,96 @@ def get_users(org_username):
         return jsonify({"message": "Failed to retrieve user data"}), 500
 
 
+@app.route("/add-education", methods=['POST'])
+def add_education():
+    """
+    curl -X POST "http://localhost:5000/add-education" -H "Content-Type: application/json" -d '{
+        "username": "<username>",
+        "institution": "<institution>",
+        "degree": "<degree>",
+        "fieldOfStudy": "<field_of_study>",
+        "from": "<from_date>",
+        "to": "<to_date>"
+    }'
+
+    Response:
+    {
+        "message": "Education added successfully!"
+    }
+    """
+    try:
+        data = request.json
+        username = data.get('username')
+        if not username:
+            return jsonify({"error": "No username provided"}), 400
+
+        user = collection.find_one({"username": username})
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        education = {
+            "institution": data.get('institution'),
+            "degree": data.get('degree'),
+            "fieldOfStudy": data.get('fieldOfStudy'),
+            "from": data.get('from'),
+            "to": data.get('to')
+        }
+
+        result = collection.update_one(
+            {"username": username},
+            {"$push": {"education": education}}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify({"message": "Education added successfully!"}), 200
+    except PyMongoError as e:
+        app.logger.error(f"Database error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+
+@app.route("/delete-education", methods=['DELETE'])
+def delete_education():
+    """
+    curl -X DELETE "http://localhost:5000/delete-education" -H "Content-Type: application/json" -d '{
+        "username": "<username>",
+        "institution": "<institution>",
+        "degree": "<degree>"
+    }'
+
+    Response:
+    {
+        "message": "Education deleted successfully!"
+    }
+    """
+    try:
+        data = request.json
+        username = data.get('username')
+        institution = data.get('institution')
+        degree = data.get('degree')
+
+        if not username or not institution or not degree:
+            return jsonify({"error": "Username, institution, or degree not provided"}), 400
+
+        result = collection.update_one(
+            {"username": username},
+            {"$pull": {"education": {"institution": institution, "degree": degree}}}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "User or education entry not found"}), 404
+
+        return jsonify({"message": "Education deleted successfully!"}), 200
+    except PyMongoError as e:
+        app.logger.error(f"Database error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 # @https_fn.on_request()
 # def user(req: https_fn.Request) -> https_fn.Response:
 #     with app.request_context(req.environ):
