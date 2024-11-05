@@ -106,7 +106,7 @@ const OrgRegister = () => {
               Organization Password
             </label>
             <input
-              type="text"
+              type="password"
               id="orgPassword"
               name="orgPassword"
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
@@ -149,7 +149,7 @@ const OrgRegister = () => {
               required
             />
           </div>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label
               className="block text-gray-700 font-medium mb-2"
               htmlFor="logo"
@@ -165,7 +165,7 @@ const OrgRegister = () => {
               onChange={handleFileChange}
               required
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label
               className="block text-gray-700 font-medium mb-2"
