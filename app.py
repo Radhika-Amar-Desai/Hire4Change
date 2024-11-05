@@ -64,10 +64,11 @@ def register_org():
             # Load the Excel file into a DataFrame
             df = pd.read_excel(file)
             user_records = df.to_dict(orient='records')
-
+            usernames = []
             # Insert each row into user_collection as a separate document
             for user in user_records:
                 # Separate education fields
+                usernames.append(user["username"])
                 education = {
                     "degree": user.pop("education_degree", None),
                     "institution": user.pop("education_institution", None),
@@ -78,16 +79,16 @@ def register_org():
                     user["education"] = education
 
                 # # Separate work experience fields
-                # work_experience = {
-                #     "company": user.pop("Work_Experience_Company", None),
-                #     "location": user.pop("Work_Experience_Location", None),
-                #     "from": user.pop("Work_Experience_From", None),
-                #     "to": user.pop("Work_Experience_To", None),
-                #     "description": user.pop("Work_Experience_Description", None)
-                # }
-                # # Only add work_experience if it has non-null values
-                # if any(work_experience.values()):
-                #     user["work_experience"] = work_experience
+                work_experience = {
+                    "company": user.pop("work_experience_company", None),
+                    "location": user.pop("work_experience_location", None),
+                    "from": user.pop("work_experience_from", None),
+                    "to": user.pop("work_experience_to", None),
+                    "description": user.pop("work_experience_description", None)
+                }
+                # Only add work_experience if it has non-null values
+                if any(work_experience.values()):
+                    user["work_experience"] = work_experience
 
                 # Include organization association
                 user_data = {
@@ -101,13 +102,13 @@ def register_org():
     else:
         return jsonify({"message": "No Excel file uploaded"}), 400
 
-    # Process logo if provided
-    logo_url = None
-    if 'logo' in request.form:
-        logo_data = request.form.get('logo')
-        logo_url = upload_image(logo_data)
-        if not logo_url:
-            return jsonify({"message": "Failed to upload logo image"}), 500
+    # # Process logo if provided
+    # logo_url = None
+    # if 'logo' in request.form:
+    #     logo_data = request.form.get('logo')
+    #     logo_url = upload_image(logo_data)
+    #     if not logo_url:
+    #         return jsonify({"message": "Failed to upload logo image"}), 500
 
     # Insert organization data into MongoDB
     org_data = {
@@ -116,7 +117,8 @@ def register_org():
         "orgPassword": org_password,
         "contactNumber": contact_number,
         "email": email,
-        "logoUrl": logo_url
+        "usernames": usernames
+        # "logoUrl": logo_url
     }
     organisation_collection.insert_one(org_data)
 
@@ -166,6 +168,10 @@ def login_org():
         app.logger.error(f"Unexpected error: {str(e)}")
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+# @app.route('/get-org-membernames', methods=['POST'])
+# def get_org_membernames():
+
 
 if __name__ == '__main__':
     app.run(debug=True)

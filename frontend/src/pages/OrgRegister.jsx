@@ -40,7 +40,6 @@ const OrgRegister = () => {
     try {
       const response = await fetch(API_ENDPOINTS.register_org, {
         method: "POST",
-        mode: "no-cors",
         body: data,
       });
 
