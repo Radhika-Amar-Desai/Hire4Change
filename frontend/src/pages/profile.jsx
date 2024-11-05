@@ -416,25 +416,82 @@ const Education = ({ userData, setUserData }) => {
     edu.fieldOfStudy,
   ]);
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
+    const deletedEducation = userData.education[index];
+    
+    // Update local state first
     const updatedEducation = userData.education.filter((_, i) => i !== index);
     setUserData({ ...userData, education: updatedEducation });
+  
+    // Send delete request to the backend
+    try {
+      const response = await fetch("http://localhost:5000/delete-education", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userData.username,  // Assuming `username` is part of `userData`
+          institution: deletedEducation.institution,
+          degree: deletedEducation.degree,
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Failed to delete education:", error);
+    }
   };
-
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewEducation({ ...newEducation, [name]: value });
   };
 
-  const handleAddEducation = () => {
+  const handleAddEducation = async () => {
+    // Update local state first
     setUserData({
       ...userData,
       education: [...userData.education, newEducation],
     });
+  
+    // Send data to the backend
+    try {
+      const response = await fetch("http://localhost:5000/add-education", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userData.username,  // Assuming `username` is part of `userData`
+          institution: newEducation.institution,
+          degree: newEducation.degree,
+          fieldOfStudy: newEducation.fieldOfStudy,
+          from: newEducation.from,      // Optional: Add these if available in `newEducation`
+          to: newEducation.to,          // Optional: Add these if available in `newEducation`
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log(result.message);
+      } else {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error("Failed to add education:", error);
+    }
+  
+    // Reset form and hide it
     setNewEducation({ degree: '', institution: '', fieldOfStudy: '' });
     setShowForm(false);
   };
-
+  
   return (
     <div className="space-y-6">
       <div className="text-2xl font-semibold text-gray-800">Education</div>
