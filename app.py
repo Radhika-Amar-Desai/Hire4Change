@@ -11,15 +11,14 @@ import traceback
 import bcrypt
 
 # Initialize Flask app and enable CORS
-app = Flask(__name__)
-CORS(app)
-
-load_dotenv()
+# app = Flask(__name__)
+# CORS(app)
 
 #Configure MongoDB (adjust your MongoDB URI here)
 client = MongoClient("mongodb://localhost:27017/")
 db = client["mydatabase"]
 organisation_collection = db["organisations"]
+user_collection = db["users"]
 
 # Helper function to handle logo upload (mock implementation)
 def upload_image(base64_data):
@@ -37,7 +36,14 @@ def upload_image(base64_data):
         app.logger.error(f"Failed to upload image: {e}")
         return None
 
-# Route to register an organization
+import pandas as pd
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Assume `organisation_collection` and `user_collection` are defined MongoDB collections
+
 @app.route('/register_org', methods=['POST'])
 def register_org():
     org_name = request.form.get('orgName')
@@ -52,12 +58,43 @@ def register_org():
         return jsonify({"message": "Organisation with this username already exists"}), 400
 
     # Process Excel file if provided
-    user_records = []
     if 'excelFile' in request.files:
         file = request.files['excelFile']
         try:
+            # Load the Excel file into a DataFrame
             df = pd.read_excel(file)
             user_records = df.to_dict(orient='records')
+
+            # Insert each row into user_collection as a separate document
+            for user in user_records:
+                # Separate education fields
+                education = {
+                    "degree": user.pop("education_degree", None),
+                    "institution": user.pop("education_institution", None),
+                    "field_of_study": user.pop("education_field_of_study", None)
+                }
+                # Only add education if it has non-null values
+                if any(education.values()):
+                    user["education"] = education
+
+                # # Separate work experience fields
+                # work_experience = {
+                #     "company": user.pop("Work_Experience_Company", None),
+                #     "location": user.pop("Work_Experience_Location", None),
+                #     "from": user.pop("Work_Experience_From", None),
+                #     "to": user.pop("Work_Experience_To", None),
+                #     "description": user.pop("Work_Experience_Description", None)
+                # }
+                # # Only add work_experience if it has non-null values
+                # if any(work_experience.values()):
+                #     user["work_experience"] = work_experience
+
+                # Include organization association
+                user_data = {
+                    "orgName": org_name,
+                    **user
+                }
+                user_collection.insert_one(user_data)
         except Exception as e:
             app.logger.error(f"Error processing Excel file: {str(e)}")
             return jsonify({"message": "Failed to process Excel file"}), 500
@@ -79,12 +116,11 @@ def register_org():
         "orgPassword": org_password,
         "contactNumber": contact_number,
         "email": email,
-        "userRecords": user_records,
         "logoUrl": logo_url
     }
     organisation_collection.insert_one(org_data)
 
-    return jsonify({"message": "Organisation registered successfully"}), 201
+    return jsonify({"message": "Organisation registered successfully and users added"}), 201
 
 @app.route('/login_org', methods=['POST'])
 def login_org():
@@ -102,7 +138,8 @@ def login_org():
     }
     """
     try:
-        data = request.json
+        data = request.get_json()
+        print(data)
         username = data.get('username')
         email = data.get('email')
         password = data.get('password')

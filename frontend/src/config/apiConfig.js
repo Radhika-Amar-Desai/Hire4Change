@@ -19,7 +19,7 @@ const API_ENDPOINTS = {
   get_conversation: `${API_BASE_URL_DATABASE}/get-conversation`,
   get_all_messages: `${API_BASE_URL_DATABASE}/get-all-messages`,
   register_org: `http://127.0.0.1:5000/register_org`,
-  login_org: `http://127.0.0.1:5000/login_org`
+  login_org: `http://127.0.0.1:5000/login_org`,
 };
 
 export default API_ENDPOINTS;

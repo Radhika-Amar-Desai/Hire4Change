@@ -336,9 +336,9 @@ const ProfileNavBar = () => {
     <nav className="flex float-right">
       <ProfileNavBarComponent title="profile" display_title="Profile" />
       <ProfileNavBarComponent title="education" display_title="Education" />
-      <ProfileNavBarComponent title="reviews" display_title="Reviews" />
+      {/* <ProfileNavBarComponent title="reviews" display_title="Reviews" /> */}
       <JobNavBar />
-      <ProfileNavBarComponent title="portfolio" display_title="Portfolio" />
+      {/* <ProfileNavBarComponent title="portfolio" display_title="Portfolio" /> */}
       <ProfileNavBarComponent title="work" display_title="Work Experience" />
     </nav>
   );

@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 
 const OrgRegister = () => {
   const [formData, setFormData] = useState({
-    orgName: '',
-    orgUsername: '',
-    orgPassword: '',
-    contactNumber: '',
-    email: '',
+    orgName: "",
+    orgUsername: "",
+    orgPassword: "",
+    contactNumber: "",
+    email: "",
     logo: null,
     excelFile: null,
   });
-  
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,19 +27,20 @@ const OrgRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const data = new FormData();
     data.append("orgName", formData.orgName);
     data.append("orgUsername", formData.orgUsername);
     data.append("orgPassword", formData.orgPassword);
     data.append("contactNumber", formData.contactNumber);
     data.append("email", formData.email);
-    data.append("logo", formData.logo);       // Attach logo file
+    data.append("logo", formData.logo); // Attach logo file
     data.append("excelFile", formData.excelFile); // Attach Excel file
 
     try {
       const response = await fetch(API_ENDPOINTS.register_org, {
         method: "POST",
+        mode: "no-cors",
         body: data,
       });
 
@@ -51,7 +52,6 @@ const OrgRegister = () => {
 
       alert("Organization registered successfully!");
       navigate("/login");
-
     } catch (error) {
       console.error("Error submitting data:", error);
       alert("An unexpected error occurred.");
@@ -61,10 +61,17 @@ const OrgRegister = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Organization Registration</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Organization Registration
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="orgName">Organization Name</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="orgName"
+            >
+              Organization Name
+            </label>
             <input
               type="text"
               id="orgName"
@@ -76,7 +83,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="orgUsername">Organization Username</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="orgUsername"
+            >
+              Organization Username
+            </label>
             <input
               type="text"
               id="orgUsername"
@@ -88,7 +100,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="orgPassword">Organization Password</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="orgPassword"
+            >
+              Organization Password
+            </label>
             <input
               type="text"
               id="orgPassword"
@@ -100,7 +117,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="contactNumber">Contact Number</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="contactNumber"
+            >
+              Contact Number
+            </label>
             <input
               type="tel"
               id="contactNumber"
@@ -112,7 +134,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="email">Email ID</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="email"
+            >
+              Email ID
+            </label>
             <input
               type="email"
               id="email"
@@ -124,7 +151,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="logo">Logo Image</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="logo"
+            >
+              Logo Image
+            </label>
             <input
               type="file"
               id="logo"
@@ -136,7 +168,12 @@ const OrgRegister = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2" htmlFor="excelFile">Excel Sheet for Registration of Members</label>
+            <label
+              className="block text-gray-700 font-medium mb-2"
+              htmlFor="excelFile"
+            >
+              Excel Sheet for Registration of Members
+            </label>
             <input
               type="file"
               id="excelFile"
