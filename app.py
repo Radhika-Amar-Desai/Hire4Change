@@ -169,8 +169,22 @@ def login_org():
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-# @app.route('/get-org-membernames', methods=['POST'])
-# def get_org_membernames():
+@app.route('/get-org-membernames', methods=['POST'])
+def get_org_membernames():
+    # Get the organization name from the request data
+    org_name = request.json.get('orgName')
+    if not org_name:
+        return jsonify({"message": "Organization name is required"}), 400
+
+    # Query the organisation_collection for the document with the specified orgName
+    organization = organisation_collection.find_one({"orgName": org_name}, {"usernames": 1})
+
+    # Check if the organization was found and if it has member names
+    if not organization or "usernames" not in organization:
+        return jsonify({"message": "No members found for this organization"}), 404
+
+    # Return the list of member names
+    return jsonify({"memberNames": organization["usernames"]}), 200
 
 
 if __name__ == '__main__':

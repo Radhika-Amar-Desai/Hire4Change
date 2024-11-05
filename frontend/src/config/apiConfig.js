@@ -20,6 +20,7 @@ const API_ENDPOINTS = {
   get_all_messages: `${API_BASE_URL_DATABASE}/get-all-messages`,
   register_org: `http://127.0.0.1:5000/register_org`,
   login_org: `http://127.0.0.1:5000/login_org`,
+  get_org_membernames: `http://127.0.0.1:5000/get-org-membernames`,
 };
 
 export default API_ENDPOINTS;
