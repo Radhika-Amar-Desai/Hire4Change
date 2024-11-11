@@ -18,7 +18,7 @@ import bcrypt
 client = MongoClient("mongodb://localhost:27017/")
 db = client["mydatabase"]
 organisation_collection = db["organisations"]
-user_collection = db["users"]
+collection = db["users"]
 
 # Helper function to handle logo upload (mock implementation)
 def upload_image(base64_data):
@@ -42,7 +42,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Assume `organisation_collection` and `user_collection` are defined MongoDB collections
+# Assume `organisation_collection` and `collection` are defined MongoDB collections
 
 @app.route('/register_org', methods=['POST'])
 def register_org():
@@ -65,7 +65,7 @@ def register_org():
             df = pd.read_excel(file)
             user_records = df.to_dict(orient='records')
             usernames = []
-            # Insert each row into user_collection as a separate document
+            # Insert each row into collection as a separate document
             for user in user_records:
                 # Separate education fields
                 usernames.append(user["username"])
@@ -95,7 +95,7 @@ def register_org():
                     "orgName": org_name,
                     **user
                 }
-                user_collection.insert_one(user_data)
+                collection.insert_one(user_data)
         except Exception as e:
             app.logger.error(f"Error processing Excel file: {str(e)}")
             return jsonify({"message": "Failed to process Excel file"}), 500

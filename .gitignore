@@ -1,3 +1,7 @@
 env/
 backend/database/.env 
 backend/users/.env
+backend/functions/venv
+app.py
+sample.py
+test.py

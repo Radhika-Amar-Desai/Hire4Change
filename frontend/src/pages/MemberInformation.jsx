@@ -53,7 +53,7 @@
 
 // function MemberInfo() {
 //   const [memberNames, setMemberNames] = React.useState([]);
-  
+
 //   // Simulating fetching member names
 //   React.useEffect(() => {
 //     // Example of fetching member names from an API or other source
@@ -112,16 +112,16 @@ function FaceCard({ memberName, onClick }) {
 function MemberInfo() {
   const [memberNames, setMemberNames] = React.useState([]);
   const navigate = useNavigate(); // Move useNavigate here for clarity
-  
+
   // Fetching member names
   React.useEffect(() => {
     const fetchMemberNames = async () => {
       const response = await fetch(API_ENDPOINTS.get_org_membernames, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ orgName: 'NGO' }), // Replace with the actual org name
+        body: JSON.stringify({ orgName: localStorage.getItem("orgname") }), // Replace with the actual org name
       });
       const data = await response.json();
       if (response.ok) {
@@ -137,16 +137,16 @@ function MemberInfo() {
   const handleImageClick = (name) => {
     localStorage.setItem("username", name); // Store member name as a string
     localStorage.setItem("userType", "individual");
-    navigate('/'); // Navigate to the desired route
+    navigate("/"); // Navigate to the desired route
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center">
       <div className="grid grid-cols-3 gap-[5vw]">
         {memberNames.map((name, index) => (
-          <FaceCard 
-            key={index} 
-            memberName={name} 
+          <FaceCard
+            key={index}
+            memberName={name}
             onClick={() => handleImageClick(name)} // Pass the click handler
           />
         ))}

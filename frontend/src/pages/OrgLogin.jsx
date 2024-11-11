@@ -30,7 +30,7 @@ function OrgLogin() {
       const result = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("username", loginData.username);
+        localStorage.setItem("orgname", loginData.username);
         localStorage.setItem("isLoggedIn", "true");
 
         navigate("/");

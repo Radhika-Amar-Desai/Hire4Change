@@ -1,6 +1,6 @@
 const API_BASE_URL = "https://us-central1-hire4change-4d9a9.cloudfunctions.net";
 const API_BASE_URL_USER = `${API_BASE_URL}/user`;
-const API_BASE_URL_DATABASE = `${API_BASE_URL}/database`;
+const API_BASE_URL_DATABASE = `${API_BASE_URL}/database`; 
 
 const API_ENDPOINTS = {
   login: `${API_BASE_URL_USER}/login`,
@@ -18,9 +18,9 @@ const API_ENDPOINTS = {
   message: `${API_BASE_URL_DATABASE}/message`,
   get_conversation: `${API_BASE_URL_DATABASE}/get-conversation`,
   get_all_messages: `${API_BASE_URL_DATABASE}/get-all-messages`,
-  register_org: `http://127.0.0.1:5000/register_org`,
-  login_org: `http://127.0.0.1:5000/login_org`,
-  get_org_membernames: `http://127.0.0.1:5000/get-org-membernames`,
+  register_org: `${API_BASE_URL_USER}/register_org`,
+  login_org: `${API_BASE_URL_USER}/login_org`,
+  get_org_membernames: `${API_BASE_URL_USER}/get-org-membernames`,
 };
 
 export default API_ENDPOINTS;

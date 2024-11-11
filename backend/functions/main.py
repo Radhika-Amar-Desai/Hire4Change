@@ -1,4 +1,3 @@
-# main.py
 from firebase_admin import initialize_app, storage
 from firebase_functions import https_fn
 from flask import Flask, request, jsonify
@@ -8,38 +7,29 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
-from bson import json_util
+from bson import json_util, ObjectId
 import json
-import hashlib
 import base64
-from uuid import uuid4 
+from uuid import uuid4
 import traceback
-from bson import ObjectId
-from bson.errors import InvalidId
-from jobs import fetch_job, create_job, search_jobs, apply_job, posted_jobs, assign_jobs, complete_job
-from messages import message, get_conversation, get_all_messages 
+import hashlib
+import pandas as pd
 
 load_dotenv()
-MONGODB_URI = os.getenv("MONGODB_URI")
-
+MONGODB_URI = "mongodb+srv://Project1:Radhika@cluster.urbb9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster&tls=true&tlsAllowInvalidCertificates=true"
 client = MongoClient(MONGODB_URI)
-
 
 initialize_app()
 app = Flask(__name__)
-CORS(app)  
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 try:
     database = client.get_database("Users")
-    collection = database.get_collection("Job_listings")
-    bugs = database.get_collection("Bugs")
-    users = database.get_collection("Users")
-    messages = database.get_collection("Messages")
-    transactions = database.get_collection("Transactions")
+    collection = database.get_collection("Users")
+    organisation_collection = database.get_collection("Organisation")
 except PyMongoError as e:
     app.logger.error(f"Failed to connect to MongoDB: {str(e)}")
     
-
 def upload_image(image_data):
     try:
         image_bytes = base64.b64decode(image_data)
@@ -55,499 +45,6 @@ def upload_image(image_data):
     except Exception as e:
         app.logger.error(f"Error uploading image: {str(e)}")
         return str(e)
-
-@app.route("/add-bug", methods=['POST'])
-def add_bug():
-    try:
-        
-        data = request.json
-        if not data:
-            return jsonify({"error": "No data provided"}), 400
-        current_date = datetime.now().isoformat()
-        data['server_date'] = current_date
-        result = bugs.insert_one(data)
-        
-        if result.acknowledged:
-            return jsonify({"message": "Data inserted successfully", "id": str(result.inserted_id)}), 201
-        else:
-            return jsonify({"error": "Failed to insert data"}), 500
-    except PyMongoError as e:
-        app.logger.error(f"Database error: {str(e)}")
-        return jsonify({"error": "Database error occurred"}), 500
-    except Exception as e:
-        app.logger.error(f"Unexpected error: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
-# Jobing
-
-
-@app.route("/fetch-job/<job_id>", methods=['GET'])
-def fetch_job_route(job_id):
-
-    """
-    curl -X GET http://127.0.0.1:5000/fetch-job/<JOB-ID>
-
-Response in JSON:
-
-{
-  "_id": "ObjectId",
-  "applicants": [
-    "ApplicantUsername"
-  ],
-  "applicationDeadline": "YYYY-MM-DDTHH:MM:SSZ",
-  "assigned": "ObjectId",
-  "category": "Category",
-  "description": "Description",
-  "estimatedDuration": "Duration",
-  "experienceLevel": "ExperienceLevel",
-  "fromDateTime": "YYYY-MM-DDTHH:MM:SSZ",
-  "images": [
-    "https://example.com/images/image1.jpg",
-    "https://example.com/images/image2.jpg"
-  ],
-  "keywords": [
-    "Keyword1",
-    "Keyword2",
-    "Keyword3"
-  ],
-  "lastModifiedDate": "YYYY-MM-DDTHH:MM:SSZ",
-  "location": {
-    "address": "Address",
-    "city": "City",
-    "coordinates": {
-      "coordinates": [
-        Longitude,
-        Latitude
-      ],
-      "type": "Point"
-    },
-    "country": "Country",
-    "pincode": "PostalCode",
-    "state": "State",
-    "street": "Street"
-  },
-  "postedDate": "YYYY-MM-DDTHH:MM:SSZ",
-  "priceQuote": {
-    "amount": Amount,
-    "currency": "Currency",
-    "rateType": "RateType"
-  },
-  "publisher": "PublisherName",
-  "skillsRequired": [
-    "Skill1",
-    "Skill2",
-    "Skill3"
-  ],
-  "status": "Status",
-  "title": "Title",
-  "toDateTime": "YYYY-MM-DDTHH:MM:SSZ",
-  "type": "Type",
-  "views": ViewsCount
-}
-"""
-
-    return fetch_job(job_id, collection, app.logger)
-
-
-
-@app.route("/create-job-listing", methods=['POST'])
-def create_job_route():
-
-    """
-curl -X POST http://localhost:5000/create-job-listing \
--H "Content-Type: application/json" \
--d '{
-  "publisher": "job publisher",
-  "title": "job title",
-  "description": "job description",
-  "category": "job category",
-  "fromDateTime": "start date and time in ISO 8601 format",
-  "toDateTime": "end date and time in ISO 8601 format",
-  "location": {
-    "address": "street address",
-    "city": "city",
-    "state": "state or province",
-    "country": "country",
-    "pincode": "postal code"
-  },
-  "priceQuote": {
-    "amount": "price amount",
-    "currency": "currency code (e.g., INR)",
-    "rateType": "type of rate (e.g., fixed)"
-  },
-  "skillsRequired": [
-    "skills required for the job"
-  ],
-  "keywords": [
-    "keywords associated with the job"
-  ],
-  "applicationDeadline": "application deadline in ISO 8601 format"
-}'
-
-Returned Response:
-
-{
-  "job_id": "672279df25e5f84b050c2e08",
-  "message": "Job listing created successfully, but failed to update user's postedJobs"
-}
-
-"""
-
-    return create_job(request.json, users,collection, upload_image, app.logger)
-
-
-
-@app.route("/search-job-listing", methods=['POST'])
-def search_job_route():
-     """
-     curl -X POST http://localhost:5000/search-job-listing -H "Content-Type: application/json" -d '{
-  "query": "search keyword",
-  "filters": {
-    "city": "city name",
-    "min_price": "minimum price",
-    "max_price": "maximum price"
-  },
-  "sort_by": "sorting field (e.g., postedDate)",
-  "sort_order": "sorting order (asc or desc)"
-}'
-
-Response:
-
-{
-  "results": [
-    {
-      "_id": "job id",
-      "applicants": [
-        "list of applicants"
-      ],
-      "applicationDeadline": "application deadline in ISO 8601 format",
-      "assigned": "assigned user id or null",
-      "category": "job category",
-      "description": "job description",
-      "estimatedDuration": "estimated duration of the job",
-      "experienceLevel": "required experience level",
-      "fromDateTime": "start date and time in ISO 8601 format",
-      "images": [
-        "list of image URLs"
-      ],
-      "keywords": [
-        "list of keywords related to the job"
-      ],
-      "lastModifiedDate": "last modified date in ISO 8601 format",
-      "location": {
-        "address": "street address",
-        "city": "city name",
-        "coordinates": {
-          "coordinates": [
-            "longitude",
-            "latitude"
-          ],
-          "type": "Point"
-        },
-        "country": "country name",
-        "pincode": "postal code",
-        "state": "state or province",
-        "street": "street name"
-      },
-      "postedDate": "posted date in ISO 8601 format",
-      "priceQuote": {
-        "amount": "price amount",
-        "currency": "currency code (e.g., INR)",
-        "rateType": "rate type (e.g., fixed)"
-      },
-      "publisher": "publisher username",
-      "skillsRequired": [
-        "list of required skills"
-      ],
-      "status": "current status of the job",
-      "title": "job title",
-      "toDateTime": "end date and time in ISO 8601 format",
-      "type": "job type (e.g., on-site)",
-      "views": "number of views"
-    }
-  ]
-}
-     """
-
-     return search_jobs(request.json,collection,app.logger)
-
-@app.route("/apply-job", methods=['POST'])
-def apply_job_route():
-
-    """
-    curl -X POST http://localhost:5000/apply-job -H "Content-Type: application/json" -d '{
-    "applicantUsername": "Radhika",
-    "jobID": "672279df25e5f84b050c2e08"
-}'
-{
-  "message": "Application submitted successfully and job saved"
-}
-
-
-    Request:
-    {
-  "applicantUsername": "applicant's username",
-  "jobID": "job ID to apply to"
-    }
-
-    Response:
-
-    {
-  "message": "confirmation message indicating the application status"
-    }
-
-
-    """
-
-    return apply_job(request.json, collection, users, app.logger)
-
-@app.route("/posted-jobs",methods=['POST'])
-def posted_jobs_route():
-
-    """
-    {
-  "message": "confirmation message indicating successful retrieval",
-  "postedJobs": [
-    {
-      "_id": "job id",
-      "applicants": [
-        "list of applicants"
-      ],
-      "applicationDeadline": "application deadline in ISO 8601 format",
-      "assigned": "assigned user id or null",
-      "category": "job category",
-      "description": "job description",
-      "estimatedDuration": "estimated duration of the job",
-      "experienceLevel": "required experience level",
-      "fromDateTime": "start date and time in ISO 8601 format",
-      "images": [
-        "list of image URLs"
-      ],
-      "keywords": [
-        "list of keywords related to the job"
-      ],
-      "lastModifiedDate": "last modified date in ISO 8601 format",
-      "location": {
-        "address": "street address",
-        "city": "city name",
-        "coordinates": {
-          "coordinates": [
-            "longitude",
-            "latitude"
-          ],
-          "type": "Point"
-        },
-        "country": "country name",
-        "pincode": "postal code",
-        "state": "state or province",
-        "street": "street name"
-      },
-      "postedDate": "posted date in ISO 8601 format",
-      "priceQuote": {
-        "amount": "price amount",
-        "currency": "currency code (e.g., INR)",
-        "rateType": "rate type (e.g., fixed)"
-      },
-      "publisher": "publisher username",
-      "skillsRequired": [
-        "list of required skills"
-      ],
-      "status": "current status of the job",
-      "title": "job title",
-      "toDateTime": "end date and time in ISO 8601 format",
-      "type": "job type (e.g., on-site)",
-      "views": "number of views"
-    }
-  ]
-}
-
-    """
-
-    return posted_jobs(request.json,users,app.logger)
-
-
-@app.route("/assign-job", methods=['POST'])
-def assign_job_route():
-    """
-    curl -X POST http://localhost:8000/assign-job \
-  -H "Content-Type: application/json" \
-  -d '{
-     "userId": "your_user_id", 
-     "jobId": "your_job_id"
-  }'
-
-  Response:
-  {
-  "message": "Job assigned successfully"
-  }
-
-    """
-    return assign_jobs(request.json, users, collection, transactions, app.logger)
-
-@app.route("/complete-job", methods=['POST'])
-def complete_jobs_route():
-    """
-    curl -X POST http://localhost:5000/complete-job -H "Content-Type: application/json" -d '{
-    "jobId": "JOB ID"
-  }'
-
-  Response:
-  {
-   "message": "Job has been assigned"
-  }
-
-    """
-    return complete_job(request.json, users, collection, transactions, app.logger)
-
-
-# Messagin
-@app.route("/message", methods=['POST'])
-def message_route():
-    """
-    curl -X POST http://localhost:5000/complete-job -H "Content-Type: application/json" -d
-      '{
-        "sender": "Sender Username",       
-        "receiver": "Receiver Username",   
-        "content": "Message Content",       
-        "contentType": "text|image",        
-        "timestamp": "YYYY-MM-DDTHH:MM:SSZ" 
-    }'
-    """
-    if request.json:
-        return message(request.json, messages, upload_image, app.logger)
-    else:
-        return jsonify({"error": "Invalid request data"}), 400
-
-
-@app.route("/get-conversation", methods=['POST'])
-def get_conversation_route():
-    
-    """
-      curl -X POST http://localhost:5000/get-conversation -H "Content-Type: application/json" -d '{
-    "sender": "Sender Username",    
-      "receiver": "Receiver Username" 
-    }'
-
-    Response:
-
-        {
-    "messages": [
-      {
-        "content": "Message Content",
-        "contentType": "Content Type",
-        "sender": "Sender Name",
-        "timestamp": "Timestamp Format"
-      },
-     {
-        "content": "Message Content",
-        "contentType": "Content Type",
-        "sender": "Sender Name",
-       "timestamp": "Timestamp Format"
-      },
-      {
-        "content": "Message Content",
-        "contentType": "Content Type",
-        "sender": "Sender Name",
-        "timestamp": "Timestamp Format"
-     }
-    ],
-    "receiver": "Receiver Name",
-    "sender": "Sender Name"
-    }
-
-    """
-
-    if request.json:
-        return get_conversation(request.json, messages, app.logger)
-    else:
-        return jsonify({"error": "Invalid request data"}), 400
-
-@app.route("/get-all-messages", methods=['POST'])
-def get_all_messages_route():
-    
-    """
-      curl -X POST http://localhost:5000/get-all-messages -H "Content-Type: application/json" -d '{
-    "username": "Username"
-}'
-
-
-    
-        Response:
-
-        {
-  "conversations": [
-    {
-      "lastMessage": {
-        "content": "Last message content",
-        "contentType": "Content type of the message",
-        "receiver": "Receiver name",
-        "sender": "Sender name",
-        "timestamp": "Timestamp of the last message"
-      },
-      "receiver": "Receiver name",
-      "sender": "Sender name"
-    },
-    {
-      "lastMessage": {
-        "content": "Last message content",
-        "contentType": "Content type of the message",
-        "receiver": "Receiver identifier",
-        "sender": "Sender name",
-        "timestamp": "Timestamp of the last message"
-      },
-      "receiver": "Receiver identifier",
-      "sender": "Sender name"
-    }
-  ]
-}
-    
-    """
-    if request.json:
-        return get_all_messages(request.json, messages, app.logger)
-    else:
-        return jsonify({"error": "Invalid request data"}), 400
-
-
-@app.route("/add-to-wallet", methods=['POST'])
-def add_to_wallet():
-    
-    """
-    curl -X POST http://localhost:5000/add-to-wallet \
-  -H "Content-Type: application/json" \
-  -d '{
-        "username": "Username",
-        "amount": 100
-      }'
-
-    Response:
-
-    {
-  "message": "Successfully added 100 to Radhika123's wallet"
-    }
-
-    """
-
-    try:
-        data = request.json
-        username = data.get('username')
-        amount = data.get('amount')
-        
-        if not username or not amount:
-            return jsonify({"error": "Username and amount are required"}), 400
-        
-        result = users.update_one(
-            {"username": username},
-            {"$inc": {"wallet": amount}}
-        )
-        
-        if result.modified_count == 1:
-            return jsonify({"message": f"Successfully added {amount} to {username}'s wallet"}), 200
-        else:
-            return jsonify({"error": "Failed to update wallet"}), 500
-    except Exception as e:
-        app.logger.error(f"Error adding to wallet: {str(e)}")
-        return jsonify({"error": "An error occurred while adding to wallet"}), 500
-
-
 
 def serialize(data):
     """Recursively converts ObjectId fields to strings in a given dictionary."""
@@ -567,7 +64,7 @@ def profile():
         if not username:
             return jsonify({"error": "No username provided"}), 400
 
-        user = users.find_one({"username": username})
+        user = collection.find_one({"username": username})
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -615,7 +112,7 @@ def add_portfolio():
         }
 
         # Update the user's portfolio in the database
-        users.update_one({"username": username}, {"$push": {"portfolioItems": portfolio}})
+        collection.update_one({"username": username}, {"$push": {"portfolioItems": portfolio}})
 
         return jsonify({"message": "Portfolio updated successfully!"}), 200
     except PyMongoError as e:
@@ -635,7 +132,7 @@ def add_work_experience():
             return jsonify({"error": "No username provided"}), 400
 
         # Find the user and get the current length of the work_experience array
-        user = users.find_one({"username": username})
+        user = collection.find_one({"username": username})
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -656,7 +153,7 @@ def add_work_experience():
         }
 
         # Add the new work experience to the user's work_experience array in the database
-        result = users.update_one(
+        result = collection.update_one(
             {"username": username},
             {"$push": {"work_experience": work_experience}}
         )
@@ -683,7 +180,7 @@ def delete_work_experience():
             return jsonify({"error": "Username or work experience ID not provided"}), 400
 
         # Remove the work experience with the matching ID from the array
-        result = users.update_one(
+        result = collection.update_one(
             {"username": username},
             {"$pull": {"work_experience": {"id": experience_id}}}
         )
@@ -725,7 +222,7 @@ def update_work_experience():
             updated_experience['work_experience.$.description'] = data.get('description')
 
         # Update the specific work experience in the array
-        result = users.update_one(
+        result = collection.update_one(
             {"username": username, "work_experience.id": experience_id},
             {"$set": updated_experience}
         )
@@ -745,7 +242,7 @@ def update_work_experience():
 @app.route("/get-data", methods=['GET'])
 def get_data():
     try:
-        cursor = users.find({})
+        cursor = collection.find({})
         data = list(cursor)
         if not data:
             return jsonify({"error": "No data found"}), 404
@@ -783,7 +280,7 @@ def add_data():
 
         current_date = datetime.now().isoformat()
         data['server_date'] = current_date
-        result = users.insert_one(data)
+        result = collection.insert_one(data)
         if result.acknowledged:
             return jsonify({"message": "Data inserted successfully", "id": str(result.inserted_id)}), 201
         else:
@@ -802,7 +299,7 @@ def check_username():
         if not username:
             return jsonify({"error": "No username provided"}), 400
 
-        user = users.find_one({"username": username})
+        user = collection.find_one({"username": username})
         exists = user is not None
 
         return jsonify({"exists": exists}), 200
@@ -867,7 +364,7 @@ def search_users_route():
         pipeline.append({"$limit": 100})
 
         # Execute the pipeline
-        results = list(users.aggregate(pipeline))
+        results = list(collection.aggregate(pipeline))
 
         # Convert ObjectId to string for each document
         for user in results:
@@ -922,7 +419,7 @@ def login():
         if not username or not email or not password:
             return jsonify({"error": "Missing credentials"}), 400
 
-        user = users.find_one({"username": username, "email": email})
+        user = collection.find_one({"username": username, "email": email})
         if user and user.get('password') == password:
             return jsonify({"message": "Login successful"}), 200
         else:
@@ -936,16 +433,203 @@ def login():
         app.logger.error(traceback.format_exc())
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+# @app.route('/register_org', methods=['POST'])
+# def register_org():
+#     """
+#     curl -X POST http://127.0.0.1:5000/register_org \
+#     -F "orgName=Test Organization" \
+#     -F "orgUsername=test_org" \
+#     -F "contactNumber=1234567890" \
+#     -F "email=test@example.com" \
+#     -F "excelFile=@/path/to/your/excel_file.xlsx" \
+#     -F "logo=$(base64 -w 0 /path/to/your/logo.jpg)"
+
+#         Response:
+#     {   
+#     "message": "organization registered successfully"
+#     }
+#     """
+#     org_name = request.form.get('orgName')
+#     org_username = request.form.get('orgUsername')
+#     contact_number = request.form.get('contactNumber')
+#     email = request.form.get('email')
+    
+#     existing_org = organization_collection.find_one({"orgUsername": org_username})
+#     if existing_org:
+#         return jsonify({"message": "organization with this username already exists"}), 400
+
+#     user_records = []  
+    
+#     if 'excelFile' in request.files:
+#         file = request.files['excelFile']
+#         try:
+#             df = pd.read_excel(file)
+#             user_records = df.to_dict(orient='records')  
+#         except Exception as e:
+#             app.logger.error(f"Error processing Excel file: {str(e)}")
+#             return jsonify({"message": "Failed to process Excel file"}), 500
+#     else:
+#         return jsonify({"message": "No Excel file uploaded"}), 400
+
+#     logo_url = None
+#     if 'logo' in request.form:
+#         logo_data = request.form.get('logo')
+#         logo_url = upload_image(logo_data)
+#         if not logo_url:
+#             return jsonify({"message": "Failed to upload logo image"}), 500
+
+#     org_data = {
+#         "orgName": org_name,
+#         "orgUsername": org_username,
+#         "contactNumber": contact_number,
+#         "email": email,
+#         "userRecords": user_records,  
+#         "logoUrl": logo_url          
+#     }
+#     organization_collection.insert_one(org_data)
+    
+#     return jsonify({"message": "Organisation registered successfully"}), 201
+
+@app.route('/register_org', methods=['POST'])
+def register_org():
+    org_name = request.form.get('orgName')
+    org_username = request.form.get('orgUsername')
+    org_password = request.form.get('orgPassword')
+    contact_number = request.form.get('contactNumber')
+    email = request.form.get('email')
+
+    # Check if organization username already exists
+    existing_org = organisation_collection.find_one({"orgUsername": org_username})
+    if existing_org:
+        return jsonify({"message": "Organisation with this username already exists"}), 400
+
+    # Process Excel file if provided
+    if 'excelFile' in request.files:
+        file = request.files['excelFile']
+        try:
+            # Load the Excel file into a DataFrame
+            df = pd.read_excel(file)
+            user_records = df.to_dict(orient='records')
+            usernames = []
+            # Insert each row into collection as a separate document
+            for user in user_records:
+                # Separate education fields
+                usernames.append(user["username"])
+                education = {
+                    "degree": user.pop("education_degree", None),
+                    "institution": user.pop("education_institution", None),
+                    "field_of_study": user.pop("education_field_of_study", None)
+                }
+                # Only add education if it has non-null values
+                if any(education.values()):
+                    user["education"] = education
+
+                # # Separate work experience fields
+                work_experience = {
+                    "company": user.pop("work_experience_company", None),
+                    "location": user.pop("work_experience_location", None),
+                    "from": user.pop("work_experience_from", None),
+                    "to": user.pop("work_experience_to", None),
+                    "description": user.pop("work_experience_description", None)
+                }
+                # Only add work_experience if it has non-null values
+                if any(work_experience.values()):
+                    user["work_experience"] = work_experience
+
+                # Include organization association
+                user_data = {
+                    "orgName": org_name,
+                    **user
+                }
+                collection.insert_one(user_data)
+        except Exception as e:
+            app.logger.error(f"Error processing Excel file: {str(e)}")
+            return jsonify({"message": "Failed to process Excel file"}), 500
+    else:
+        return jsonify({"message": "No Excel file uploaded"}), 400
+
+    # # Process logo if provided
+    # logo_url = None
+    # if 'logo' in request.form:
+    #     logo_data = request.form.get('logo')
+    #     logo_url = upload_image(logo_data)
+    #     if not logo_url:
+    #         return jsonify({"message": "Failed to upload logo image"}), 500
+
+    # Insert organization data into MongoDB
+    org_data = {
+        "orgName": org_name,
+        "orgUsername": org_username,
+        "orgPassword": org_password,
+        "contactNumber": contact_number,
+        "email": email,
+        "usernames": usernames
+        # "logoUrl": logo_url
+    }
+    organisation_collection.insert_one(org_data)
+
+    return jsonify({"message": "Organisation registered successfully and users added"}), 201
+
+@app.route('/login_org', methods=['POST'])
+def login_org():
+    """
+    curl -X POST http://localhost:5000/login \
+    -H "Content-Type: application/json" \
+    -d '{
+      "username": "exampleUsername",
+      "email": "example@example.com",
+      "password": "examplePassword"
+    }'
+
+    {
+      "message": "Login successful"
+    }
+    """
+    try:
+        data = request.get_json()
+        print(data)
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        print(username, email, password)
+
+        if not username or not email or not password:
+            return jsonify({"error": "Missing credentials"}), 400
+
+        user = organisation_collection.find_one({"orgName": username})
+        print(user)
+        if user:
+            if password == user.get('orgPassword'):
+                return jsonify({"message": "Login successful"}), 200
+            else:
+                return jsonify({"error": "Invalid credentials"}), 401
+        else:
+            return jsonify({"error": "User does not exist"}), 401
+
+    except PyMongoError as e:
+        app.logger.error(f"Database error: {str(e)}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {str(e)}")
+        app.logger.error(traceback.format_exc())
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+@app.route('/get-org-membernames', methods=['POST'])
+def get_org_membernames():
+    org_name = request.json.get('orgName')
+    if not org_name:
+        return jsonify({"message": "Organization name is required"}), 400
+
+    organization = organisation_collection.find_one({"orgName": org_name}, {"usernames": 1})
+
+    if not organization or "usernames" not in organization:
+        return jsonify({"message": "No members found for this organization"}), 404
+
+    return jsonify({"memberNames": organization["usernames"]}), 200
 
 
-
-
-
-
-
-# @https_fn.on_request()
-# def database(req: https_fn.Request) -> https_fn.Response:
-#     with app.request_context(req.environ):
-#         return app.full_dispatch_request()
-if __name__ == "__main__":
-    app.run(debug=True)  # Change debug=False in production
+@https_fn.on_request()
+def user(req: https_fn.Request) -> https_fn.Response:
+    with app.request_context(req.environ):
+        return app.full_dispatch_request()
